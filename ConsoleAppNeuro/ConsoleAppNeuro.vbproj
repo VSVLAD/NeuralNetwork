@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{97D70D8C-6068-4CC0-8BC0-83AE53D38598}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>Module1</StartupObject>
+    <StartupObject>Program</StartupObject>
     <RootNamespace>
     </RootNamespace>
     <AssemblyName>NeuralProjectTest</AssemblyName>
@@ -70,7 +70,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Module1.vb" />
+    <Compile Include="Program.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
