@@ -11,10 +11,10 @@ Module Program
         ' 1  1    0
 
         Dim NN As New Network(2, 4, 1)
-        NN.LeaningRate = 0.1
+        NN.LeaningRate = 0.005
 
         ' Обучаем
-        For Each Epoch In Enumerable.Range(1, 100000)
+        For Each Epoch In Enumerable.Range(1, 50000)
             NN.AverageQuadError = 0.0
 
             NN.TrainingSet({0, 0}, {0})
@@ -23,6 +23,7 @@ Module Program
             NN.TrainingSet({1, 1}, {0})
 
             NN.AverageQuadError = NN.AverageQuadError / 4
+            If NN.AverageQuadError < 0.001 Then Exit For
 
             Console.WriteLine("Эпоха: {0}. Ошибка {1}", Epoch, NN.AverageQuadError.ToString("##0.##########"))
         Next

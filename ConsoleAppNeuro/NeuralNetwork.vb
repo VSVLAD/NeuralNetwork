@@ -46,12 +46,11 @@
         Public Activators()() As ActivatorFunctions
 
         ''' <summary>
-        ''' Массив со списком смещений (y)(n)
+        ''' Массив содержит слои и нейрон смещения (y)
         ''' y - номер слоя
-        ''' n - номер нейрона
-        ''' (n) - значением является смещение
+        ''' (y) - значением является смещение. По-умолчанию 0, нет смещения
         ''' </summary>
-        Public Biases()() As Double
+        Public Biases() As Double
 
         ''' <summary>
         ''' Массив со списком границ массивов (y)
@@ -108,18 +107,18 @@
             ' Определяем размерность для нейронов
             For I = 0 To NeuronCount.Length - 1
 
-                ' Инициализируем границу
+                ' Инициализируем границу и нейрон смещения
                 Bounds(I) = NeuronCount(I) - 1
+                Biases(I) = 0
 
                 ReDim Neurons(I)(Bounds(I))
                 ReDim Errors(I)(Bounds(I))
                 ReDim Activators(I)(Bounds(I))
-                ReDim Biases(I)(Bounds(I))
+                ReDim Biases(I)
 
                 ' Инициализируем активаторы и смещения
                 For N = 0 To Activators(I).GetUpperBound(0)
                     Activators(I)(N) = ActivatorFunctions.SIGMOID
-                    Biases(I)(N) = 1
                 Next
             Next
 
@@ -184,6 +183,16 @@
             Next
         End Sub
 
+        ''' <summary>Метод изменяет функцию активации у выбранного слоя</summary>
+        ''' <param name="LayerIndex">Индекс слоя</param>
+        ''' <param name="Activator">Функция активации</param>
+        Public Sub changeActivatorFunction(LayerIndex As Integer, Activator As ActivatorFunctions)
+            For N = 0 To Bounds(LayerIndex)
+                Activators(LayerIndex)(N) = Activator
+            Next
+        End Sub
+
+
         ''' <summary>Прямое распространнение для выбранных слоёв</summary>
         Private Sub Forward(FromLayerIndex As Integer, ToLayerIndex As Integer)
 
@@ -193,7 +202,7 @@
 
                 ' По всем нейронам слоя "Откуда"
                 For FromN = 0 To Bounds(FromLayerIndex)
-                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN)
+                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN) + Biases(FromLayerIndex)(FromN)
                 Next
 
                 ' Выполняем активацию
