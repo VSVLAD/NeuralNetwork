@@ -107,14 +107,16 @@
             ' Определяем размерность для нейронов
             For I = 0 To NeuronCount.Length - 1
 
-                ' Инициализируем границу и нейрон смещения
+                ' Инициализируем границу 
                 Bounds(I) = NeuronCount(I) - 1
-                Biases(I) = 0
 
                 ReDim Neurons(I)(Bounds(I))
                 ReDim Errors(I)(Bounds(I))
                 ReDim Activators(I)(Bounds(I))
                 ReDim Biases(I)
+
+                ' Нейрон смещения
+                Biases(I) = 0
 
                 ' Инициализируем активаторы и смещения
                 For N = 0 To Activators(I).GetUpperBound(0)
@@ -202,7 +204,7 @@
 
                 ' По всем нейронам слоя "Откуда"
                 For FromN = 0 To Bounds(FromLayerIndex)
-                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN) + Biases(FromLayerIndex)(FromN)
+                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN) + Biases(FromLayerIndex)
                 Next
 
                 ' Выполняем активацию
