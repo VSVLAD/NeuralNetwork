@@ -5,11 +5,16 @@ Module Program
 
     Public Sub Main()
 
-        Dim NN As New Network(2, 6, 6, 1)
+        Dim NET = NeuralSerializer.LoadState("D:\File.txt")
+
+        Return
+
+        Dim NN As New NeuralNetwork(2, 6, 6, 1)
         NN.LeaningRate = 0.1
 
         ' Обучаем
         For Each Epoch In Enumerable.Range(1, 20000000)
+            NN.Epoch = Epoch
             NN.AverageQuadError = 0.0
 
             NN.TrainingSet({0.014, 0.007}, {0.049})
@@ -53,6 +58,9 @@ Module Program
             End If
         Next
 
+        NeuralSerializer.SaveState("D:\File.txt", NN)
+        Dim otherNet = NeuralSerializer.LoadState("D:\File.txt")
+
         ' Тестируем по сетам
         Console.WriteLine("=== Проверка работы сети ===")
         Console.WriteLine("Проверка на значениях: 20 и 9. Ожидаем 90. Решение {0}", NN.Predict({0.02, 0.009})(0) * 1000)
@@ -68,7 +76,7 @@ Module Program
         ' 1  0    1
         ' 1  1    0
 
-        Dim NN As New Network(2, 4, 1)
+        Dim NN As New NeuralNetwork(2, 4, 1)
         NN.LeaningRate = 0.005
 
         ' Обучаем
