@@ -1,6 +1,9 @@
-﻿Imports System.IO
-Imports System.Text.RegularExpressions
+﻿Option Explicit On
+Option Strict On
 
+Imports System.IO
+Imports System.Text
+Imports System.Text.RegularExpressions
 
 Namespace NeuralProject
 
@@ -89,13 +92,6 @@ Namespace NeuralProject
         ' Граница всех весов
         Private weightBound As Integer
 
-        ''' <summary>
-        ''' Создаёт класс нейронной сети с инициализацией по-умолчанию
-        ''' NeuralNetwork[2, 1]
-        ''' </summary>
-        Public Sub New()
-            Init(2, 1)
-        End Sub
 
         ''' <summary>
         ''' Создаёт класс нейронной сети с выбранной конфигурацией.
@@ -107,15 +103,6 @@ Namespace NeuralProject
         ''' Остальные элементы - количество слоёв и количество нейронов в них
         ''' </param>
         Public Sub New(ParamArray NeuronCount() As Integer)
-            Init(NeuronCount)
-        End Sub
-
-        ''' <summary>
-        ''' Инициализирует нейронную сеть заданной конфигурацией.
-        ''' Используйте конструктор класса для получения подсказок по параметрам
-        ''' </summary>
-        ''' <param name="NeuronCount">Параметры сети</param>
-        Public Sub Init(ParamArray NeuronCount() As Integer)
             If NeuronCount.Length < 2 Then Throw New Exception("Неверная размерность слоёв. Должно быть минимум 2 слоя в сети")
 
             For Each xItem In NeuronCount
@@ -316,79 +303,75 @@ Namespace NeuralProject
 
 
     ''' <summary>Класс предоставляем методы для сериализации и десериализации нейросети</summary>
-    Public Class NeuralSerializer
+    Public Class NeuralState
 
-        Private Shared regExpSections As New Regex("\[(.*)\](?:(?!^$)[\s\S])+", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline Or RegexOptions.CultureInvariant)
-        Private Shared regExpInit As New Regex("Init\s*=\s*(.*)\nLearningRate\s*=\s*(.*)\nEpoch\s*=\s*(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
-        Private Shared regExp1D As New Regex("\((\d)\)\((\d)\)\s*=\s*(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
-        Private Shared regExp2D As New Regex("\((\d)\)\((\d),(\d)\)\s*=\s*(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
-
-
+        Private Shared regExpSection As New Regex("\[(.*?)\]([\W\w]+?(?:\r{2,}|\n{2,}|$))", RegexOptions.Compiled Or RegexOptions.Multiline)
+        Private Shared regExpNetwork As New Regex("\s*Layers\s*=\s*(.*)$\nLearningRate\s*=\s*(.*)$\nEpoch\s*=\s*(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
+        Private Shared regExpArrayAF As New Regex("\((\d)\)\((\d)\)\s*=\s*([A-z]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
+        Private Shared regExpArray1D As New Regex("\((\d)\)\((\d)\)\s*=\s*([\d|\.]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
+        Private Shared regExpArray2D As New Regex("\((\d)\)\((\d),(\d)\)\s*=\s*([\d|\.]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
 
         ' Метод сериализует массив формата Double()()
-        Private Shared Function NeuronSerializer(Section As String, Data As Double()()) As String
-            Dim sbWriter As New Text.StringBuilder
-            sbWriter.AppendLine($"[{Section}]")
+        Private Shared Function NeuronSerializer(Writer As StringBuilder, Section As String, Data As Double()()) As StringBuilder
+            Writer.AppendLine($"[{Section}]")
 
             For idxLayer = 0 To Data.GetUpperBound(0)
                 For idxNeuron = 0 To Data(idxLayer).GetUpperBound(0)
-                    sbWriter.AppendLine($"({idxLayer})({idxNeuron})={Data(idxLayer)(idxNeuron)}")
+                    Writer.AppendLine($"({idxLayer})({idxNeuron})={Data(idxLayer)(idxNeuron)}")
                 Next
             Next
 
-            Return sbWriter.ToString()
+            Return Writer
         End Function
 
         ' Метод сериализует массив формата Double()(,)
-        Private Shared Function WeightSerializer(Section As String, Data As Double()(,)) As String
-            Dim sbWriter As New Text.StringBuilder
-            sbWriter.AppendLine($"[{Section}]")
+        Private Shared Function WeightSerializer(Writer As StringBuilder, Section As String, Data As Double()(,)) As StringBuilder
+            Writer.AppendLine($"[{Section}]")
 
             For idxLayer = 0 To Data.GetUpperBound(0)
                 For M = 0 To Data(idxLayer).GetUpperBound(0)
                     For N = 0 To Data(idxLayer).GetUpperBound(1)
-                        sbWriter.AppendLine($"({idxLayer})({M},{N})={Data(idxLayer)(M, N)}")
+                        Writer.AppendLine($"({idxLayer})({M},{N})={Data(idxLayer)(M, N)}")
                     Next
                 Next
             Next
 
-            Return sbWriter.ToString()
+            Return Writer
         End Function
 
         ' Метод сериализует массив формата ActivatorFunction()()
-        Private Shared Function ActivatorSerializer(Section As String, Data As ActivatorFunctions()()) As String
-            Dim sbWriter As New Text.StringBuilder
-            sbWriter.AppendLine($"[{Section}]")
+        Private Shared Function ActivatorSerializer(Writer As StringBuilder, Section As String, Data As ActivatorFunctions()()) As StringBuilder
+            Writer.AppendLine($"[{Section}]")
 
             For idxLayer = 0 To Data.GetUpperBound(0)
                 For idxNeuron = 0 To Data(idxLayer).GetUpperBound(0)
-                    sbWriter.AppendLine($"({idxLayer})({idxNeuron})={Data(idxLayer)(idxNeuron)}")
+                    Writer.AppendLine($"({idxLayer})({idxNeuron})={Data(idxLayer)(idxNeuron)}")
                 Next
             Next
 
-            Return sbWriter.ToString()
+            Return Writer
         End Function
 
         ' Метод сериализует параметры сети
-        Private Shared Function NetworkSerializer(Section As String, Layers As String, LearningRate As Double, Epoch As Integer) As String
-            Dim sbWriter As New Text.StringBuilder
-            sbWriter.AppendLine($"[{Section}]")
-            sbWriter.AppendLine($"Layers={Layers}")
-            sbWriter.AppendLine($"LearningRate={LearningRate}")
-            sbWriter.AppendLine($"Epoch={Epoch}")
-            Return sbWriter.ToString()
+        Private Shared Function NetworkSerializer(Writer As StringBuilder, Section As String, Layers As String, LearningRate As Double, Epoch As Integer) As StringBuilder
+            Writer.AppendLine($"[{Section}]")
+            Writer.AppendLine($"Layers={Layers}")
+            Writer.AppendLine($"LearningRate={LearningRate}")
+            Writer.AppendLine($"Epoch={Epoch}")
+
+            Return Writer
         End Function
 
         ' Метод десериализует параметры сети в сеть
-        Private Shared Function NetworkDeserializer(SectionText As String) As NeuralNetwork
-            Dim mNetwork = regExpInit.Match(SectionText)
-            Dim Init = mNetwork.Groups(1).Value.Replace(vbCr, "").Split(",").
-                                                Select(Function(x) CInt(x)).ToArray()
+        Private Shared Function NetworkDeserializer(SectionBody As String) As NeuralNetwork
+            Dim mNetwork = regExpNetwork.Match(SectionBody)
+
+            Dim Layers = mNetwork.Groups(1).Value.Replace(vbCr, "").Split(","c).Select(Function(x) CInt(x)).ToArray()
             Dim LearningRate = CDbl(mNetwork.Groups(2).Value)
-            Dim Epoch = CDbl(mNetwork.Groups(3).Value)
+            Dim Epoch = CInt(mNetwork.Groups(3).Value)
 
             ' Первичное создание сети
-            Dim retValue = New NeuralNetwork(Init)
+            Dim retValue = New NeuralNetwork(Layers)
             retValue.LeaningRate = LearningRate
             retValue.Epoch = Epoch
 
@@ -396,105 +379,136 @@ Namespace NeuralProject
         End Function
 
         ' Метод десериализует массив Double()()
-        Private Shared Function NeuronDeserializer(SectionText As String, Network As NeuralNetwork) As NeuralNetwork
-            Dim mArray = regExp1D.Match(SectionText)
+        Private Shared Function NeuronDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
+            For Each xMatch As Match In regExpArray1D.Matches(SectionBody)
+                Network.Neurons(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = CDbl(xMatch.Groups(3).Value)
+            Next
 
             Return Network
         End Function
 
         ' Метод десериализует массив Double()()
-        Private Shared Function ErrorDeserializer(SectionText As String, Network As NeuralNetwork) As NeuralNetwork
-            Throw New NotImplementedException()
+        Private Shared Function ErrorDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
+            For Each xMatch As Match In regExpArray1D.Matches(SectionBody)
+                Network.Errors(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = CDbl(xMatch.Groups(3).Value)
+            Next
+
+            Return Network
         End Function
 
         ' Метод десериализует массив Double()(,)
-        Private Shared Function WeightDeserializer(SectionText As String, Network As NeuralNetwork) As NeuralNetwork
-            Throw New NotImplementedException()
+        Private Shared Function WeightDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
+            For Each xMatch As Match In regExpArray2D.Matches(SectionBody)
+                Network.Weights(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value), CInt(xMatch.Groups(3).Value)) = CDbl(xMatch.Groups(4).Value)
+            Next
+
+            Return Network
         End Function
 
         ' Метод десериализует массив ActivatorFunction()()
-        Private Shared Function ActivatorDeserializer(SectionText As String, resultNetworkNetwork As NeuralNetwork) As NeuralNetwork
-            Throw New NotImplementedException()
+        Private Shared Function ActivatorDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
+            Dim ActivatorFunctionName = New Dictionary(Of String, ActivatorFunctions)
+            Dim arrNames() = [Enum].GetNames(GetType(ActivatorFunctions))
+            Dim arrValues() = CType([Enum].GetValues(GetType(ActivatorFunctions)), ActivatorFunctions())
+
+            ' Готовим словарь со списком функций
+            For idx = 0 To arrNames.GetUpperBound(0)
+                ActivatorFunctionName.Add(arrNames(idx), arrValues(idx))
+            Next
+
+            For Each xMatch As Match In regExpArrayAF.Matches(SectionBody)
+                Network.Activators(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = ActivatorFunctionName(xMatch.Groups(3).Value)
+            Next
+
+            Return Network
         End Function
 
-
-
         ''' <summary>Сохранить параметры нейросети в файл</summary>
-        Public Shared Sub SaveState(FileName As String, Network As NeuralNetwork)
+        Public Shared Sub Save(FileName As String, Network As NeuralNetwork)
 
             'Меняем формат для потока, для корректной записи чисел
             Dim myCulture = Globalization.CultureInfo.CurrentCulture
             Threading.Thread.CurrentThread.CurrentCulture = Globalization.CultureInfo.InvariantCulture
 
-            ' Собираем параметры сети в строку
-            Dim strLayers As String = String.Empty
-            For n = 0 To Network.Neurons.GetUpperBound(0)
-                If n <> Network.Neurons.GetUpperBound(0) Then
-                    strLayers &= Network.Neurons(n).Length & ", "
-                Else
-                    strLayers &= Network.Neurons(n).Length
-                End If
-            Next
+            ' Собираем параметры сети в строку инициализации
+            Dim getLayers As Func(Of NeuralNetwork, String) =
+                Function(source As NeuralNetwork) As String
+                    Dim ret As String = String.Empty
+                    For n = 0 To source.Neurons.GetUpperBound(0)
+                        If n <> source.Neurons.GetUpperBound(0) Then
+                            ret &= source.Neurons(n).Length & ", "
+                        Else
+                            ret &= source.Neurons(n).Length
+                        End If
+                    Next
+                    Return ret
+                End Function
 
             ' Собираем секции
-            Dim strNetwork = NetworkSerializer("Network", strLayers, Network.LeaningRate, Network.Epoch)
-            Dim strNeurons = NeuronSerializer("Neurons", Network.Neurons)
-            Dim strErrors = NeuronSerializer("Errors", Network.Errors)
-            Dim strWeights = WeightSerializer("Weights", Network.Weights)
-            Dim strActivators = ActivatorSerializer("Activators", Network.Activators)
+            Dim sbWriter As New StringBuilder
 
-            Dim result = strNetwork & vbCrLf &
-                         strNeurons & vbCrLf &
-                         strActivators & vbCrLf &
-                         strErrors & vbCrLf &
-                         strWeights
+            sbWriter = NetworkSerializer(sbWriter, "NeuralNetwork", getLayers(Network), Network.LeaningRate, Network.Epoch)
+            sbWriter.AppendLine()
+
+            sbWriter = NeuronSerializer(sbWriter, "Neurons", Network.Neurons)
+            sbWriter.AppendLine()
+
+            sbWriter = NeuronSerializer(sbWriter, "Errors", Network.Errors)
+            sbWriter.AppendLine()
+
+            sbWriter = WeightSerializer(sbWriter, "Weights", Network.Weights)
+            sbWriter.AppendLine()
+
+            sbWriter = ActivatorSerializer(sbWriter, "Activators", Network.Activators)
+            sbWriter.AppendLine()
+
+            File.WriteAllText(FileName, sbWriter.ToString(), Encoding.UTF8)
 
             'Возвращаем формат для потока
             Threading.Thread.CurrentThread.CurrentCulture = myCulture
-
-            File.WriteAllText(FileName, result, Text.Encoding.UTF8)
         End Sub
 
-
         ''' <summary>Загрузить параметры нейросети из файла</summary>
-        Public Shared Function LoadState(FileName As String) As NeuralNetwork
+        Public Shared Function Load(FileName As String) As NeuralNetwork
 
             'Меняем формат для потока, для корректного чтения чисел
             Dim myCulture = Globalization.CultureInfo.CurrentCulture
             Threading.Thread.CurrentThread.CurrentCulture = Globalization.CultureInfo.InvariantCulture
 
-            Dim fileBody = File.ReadAllText(FileName, Text.Encoding.UTF8)
-            Dim resultNetwork As New NeuralNetwork
+            Dim fileBody = File.ReadAllText(FileName, Encoding.UTF8)
+            Dim resultNetwork As NeuralNetwork = Nothing
 
             ' Смотрим все найденные секции
-            For Each xMatch As Match In regExpSections.Matches(fileBody)
+            For Each mSection As Match In regExpSection.Matches(fileBody.Replace(vbLf, String.Empty))
 
-                ' По типу секции
-                Select Case xMatch.Groups(1).Value
+                ' Тело секции. { Костыль для регулярки секций: замена LF на пустоту, замена CR на CRLF}
+                Dim sectionBody As String = mSection.Groups(2).Value.Replace(vbCr, vbCrLf)
 
-                    Case "Network"
-                        resultNetwork = NetworkDeserializer(xMatch.Value)
+                ' По имени секции
+                Select Case mSection.Groups(1).Value
+
+                    Case "NeuralNetwork"
+                        resultNetwork = NetworkDeserializer(sectionBody)
 
                     Case "Neurons"
-                        resultNetwork = NeuronDeserializer(xMatch.Value, resultNetwork)
+                        resultNetwork = NeuronDeserializer(resultNetwork, sectionBody)
 
                     Case "Activators"
-                        resultNetwork = ActivatorDeserializer(xMatch.Value, resultNetwork)
+                        resultNetwork = ActivatorDeserializer(resultNetwork, sectionBody)
 
                     Case "Errors"
-                        resultNetwork = ErrorDeserializer(xMatch.Value, resultNetwork)
+                        resultNetwork = ErrorDeserializer(resultNetwork, sectionBody)
 
                     Case "Weights"
-                        resultNetwork = WeightDeserializer(xMatch.Value, resultNetwork)
+                        resultNetwork = WeightDeserializer(resultNetwork, sectionBody)
 
                 End Select
             Next
 
-
             'Возвращаем формат для потока
             Threading.Thread.CurrentThread.CurrentCulture = myCulture
 
-            Return Nothing
+            Return resultNetwork
         End Function
 
     End Class
