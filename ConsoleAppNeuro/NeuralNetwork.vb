@@ -16,7 +16,6 @@ Namespace NeuralProject
         HYPERTAN
     End Enum
 
-
     ''' <summary>Класс нейронной сети</summary>
     Public Class NeuralNetwork
 
