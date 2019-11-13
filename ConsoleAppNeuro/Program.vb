@@ -37,18 +37,29 @@ Module Program
 
 
     Public Sub Main()
-        Dim NN As New NeuralNetwork(5, 5)
+        TaskMoto()
+
+
+    End Sub
+
+
+
+    Public Sub TaskMoto()
+        Dim NN As New NeuralNetwork(5, 25, 25, 5)
         If NN.LeaningRate = 0 Then NN.LeaningRate = 0.005
 
         ' Генерируем трейнинг сеты
-        Dim arrSets(999) As MotoSet
+        Dim arrSets(499) As MotoSet
         For I = 1 To arrSets.GetUpperBound(0)
             arrSets(I) = CreateMotoSet(rand.Next(50, 241), rand.Next(50, 241), rand.Next(50, 241), rand.Next(50, 241), rand.Next(50, 241))
         Next
 
         ' По всем эпохам
-        For I = NN.Epoch To 10000000
-            NN.Epoch = I
+        Dim N As Integer
+        Do While N < 10000000
+            N += 1
+
+            NN.Epoch = N
             NN.AverageQuadError = 0
 
             ' По всем тренировочным сетам
@@ -57,10 +68,9 @@ Module Program
             Next
 
             NN.AverageQuadError = NN.AverageQuadError / arrSets.Length
-            If NN.AverageQuadError < 0.00000001 Then Exit For
+            If NN.AverageQuadError < 0.00000001 Then Exit Do
 
             Console.WriteLine("Эпоха: {0}. Ошибка {1}", NN.Epoch, NN.AverageQuadError.ToString("##0.################"))
-
 
             ' Управление
             If Console.KeyAvailable Then
@@ -99,12 +109,12 @@ Module Program
                         Console.ReadKey()
 
                     Case ConsoleKey.S
-                        NN.LeaningRate += 0.001
+                        NN.LeaningRate += 0.01
                         Console.Title = "LeaningRate: " & NN.LeaningRate
 
                     Case ConsoleKey.A
-                        NN.LeaningRate -= 0.001
-                        If NN.LeaningRate <= 0 Then NN.LeaningRate = 0.001
+                        NN.LeaningRate -= 0.01
+                        If NN.LeaningRate <= 0 Then NN.LeaningRate = 0.01
 
                         Console.Title = "LeaningRate: " & NN.LeaningRate
                     Case ConsoleKey.F1
@@ -112,10 +122,10 @@ Module Program
 
                     Case ConsoleKey.F2
                         NN = NeuralState.Load("Moto.txt")
-
+                        N = NN.Epoch
                 End Select
             End If
-        Next
+        Loop
 
 
     End Sub
@@ -191,10 +201,10 @@ Module Program
         ' 1  1    0
 
         Dim NN As New NeuralNetwork(2, 4, 1)
-        NN.LeaningRate = 0.005
+        NN.LeaningRate = 0.1
 
         ' Обучаем
-        For Each Epoch In Enumerable.Range(1, 50000)
+        For Each Epoch In Enumerable.Range(1, 1000000)
             NN.AverageQuadError = 0.0
 
             NN.TrainingSet({0, 0}, {0})
@@ -203,9 +213,9 @@ Module Program
             NN.TrainingSet({1, 1}, {0})
 
             NN.AverageQuadError = NN.AverageQuadError / 4
-            If NN.AverageQuadError < 0.001 Then Exit For
+            If NN.AverageQuadError < 0.0001 Then Exit For
 
-            Console.WriteLine("Эпоха: {0}. Ошибка {1}", Epoch, NN.AverageQuadError.ToString("##0.##########"))
+            Console.WriteLine("Эпоха: {0}. Ошибка {1}", Epoch, NN.AverageQuadError.ToString("##0.################"))
         Next
 
         ' Тестируем по сетам
