@@ -37,7 +37,7 @@ Module Program
 
 
     Public Sub Main()
-        TaskMoto()
+        TaskXOR()
 
 
     End Sub
@@ -201,7 +201,7 @@ Module Program
         ' 1  1    0
 
         Dim NN As New NeuralNetwork(2, 4, 1)
-        NN.LeaningRate = 0.1
+        NN.LeaningRate = 0.4
 
         ' Обучаем
         For Each Epoch In Enumerable.Range(1, 1000000)

@@ -8,17 +8,17 @@ Imports System.Runtime.InteropServices
 
 ' Проверьте значения атрибутов сборки
 
-<Assembly: AssemblyTitle("ConsoleApp1")>
+<Assembly: AssemblyTitle("NeuralNetwork")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("ConsoleApp1")>
-<Assembly: AssemblyCopyright("Copyright ©  2019")>
+<Assembly: AssemblyProduct("NeuralNetwork")>
+<Assembly: AssemblyCopyright("VS PROJECT / Copyright©  2019")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
 
 'Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
-<Assembly: Guid("4697d86b-5b20-4ff9-b31e-e6dda769a2fc")>
+<Assembly: Guid("f3bcd20b-e396-4cca-8448-5fc7c961a967")>
 
 ' Сведения о версии сборки состоят из следующих четырех значений:
 '

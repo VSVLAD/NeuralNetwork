@@ -4,37 +4,32 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{97D70D8C-6068-4CC0-8BC0-83AE53D38598}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <StartupObject>Program</StartupObject>
+    <ProjectGuid>{A1094CFE-5981-4981-90A9-135E5F70F04C}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <RootNamespace>
     </RootNamespace>
-    <AssemblyName>NeuralProjectTest</AssemblyName>
+    <AssemblyName>NeuralNetwork</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <MyType>Console</MyType>
+    <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>NeuralProjectTest.xml</DocumentationFile>
+    <DocumentationFile>NeuralNetwork.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <DefineDebug>false</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>NeuralProjectTest.xml</DocumentationFile>
+    <DocumentationFile>NeuralNetwork.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -55,7 +50,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -69,16 +63,14 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.vb" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="My Project\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NeuralNetwork\NeuralNetwork.vbproj">
-      <Project>{a1094cfe-5981-4981-90a9-135e5f70f04c}</Project>
-      <Name>NeuralNetwork</Name>
-    </ProjectReference>
+    <Compile Include="Classes\FunctionHeaviside.vb" />
+    <Compile Include="Classes\FunctionRelu.vb" />
+    <Compile Include="Classes\FunctionHypertan.vb" />
+    <Compile Include="Classes\FunctionSigmoid.vb" />
+    <Compile Include="Interfaces\IFunctionActivator.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="NeuralState.vb" />
+    <Compile Include="NeuralNetwork.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
