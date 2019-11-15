@@ -200,12 +200,15 @@ Module Program
         ' 1  0    1
         ' 1  1    0
 
-        Dim NN As New NeuralNetwork(2, 4, 1)
-        NN.LeaningRate = 0.4
+        Dim NN As New NeuralNetwork(2, 2, 1)
+        NN.LeaningRate = 0.2
+
+        If IO.File.Exists("XOR.txt") Then NN = NeuralState.Load("XOR.txt")
 
         ' Обучаем
         For Each Epoch In Enumerable.Range(1, 1000000)
             NN.AverageQuadError = 0.0
+            NN.Epoch = Epoch
 
             NN.TrainingSet({0, 0}, {0})
             NN.TrainingSet({0, 1}, {1})
@@ -224,6 +227,8 @@ Module Program
         Console.WriteLine("Проверка на значениях: 0 и 1. Ожидаем 1. Решение {0}", NN.Predict({0, 1})(0))
         Console.WriteLine("Проверка на значениях: 1 и 0. Ожидаем 1. Решение {0}", NN.Predict({1, 0})(0))
         Console.WriteLine("Проверка на значениях: 1 и 1. Ожидаем 0. Решение {0}", NN.Predict({1, 1})(0))
+
+        NeuralState.Save("XOR.txt", NN)
         Console.ReadLine()
     End Sub
 

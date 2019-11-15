@@ -70,7 +70,7 @@ Namespace NeuralProject
 
 
         'Коллекция функций активаций
-        Friend Functions As New Dictionary(Of String, IFunctionActivator)
+        Friend Functions As Dictionary(Of String, IFunctionActivator)
 
         ' Рандом
         Private rand As Random
@@ -111,7 +111,9 @@ Namespace NeuralProject
             ReDim Weights(weightBound)
 
             ' Находим все функции активации в приложении
+            Functions = New Dictionary(Of String, IFunctionActivator)
             Dim typeIAF = GetType(IFunctionActivator)
+
             For Each xAssembly In AppDomain.CurrentDomain.GetAssemblies()
                 For Each xType In xAssembly.GetTypes()
                     If xType.IsClass AndAlso Not xType.IsAbstract AndAlso typeIAF.IsAssignableFrom(xType) Then
@@ -120,6 +122,7 @@ Namespace NeuralProject
                     End If
                 Next
             Next
+
             ' Определяем размерность для нейронов
             For I = 0 To NeuronCount.Length - 1
 
@@ -134,7 +137,7 @@ Namespace NeuralProject
                 ' Нейрон смещения
                 Biases(I) = 0
 
-                ' Инициализируем активаторы и смещения
+                ' Инициализируем активаторы сигмойдой по-умолчанию
                 For N = 0 To Activators(I).GetUpperBound(0)
                     Activators(I)(N) = Functions("SIGMOID")
                 Next
@@ -164,7 +167,7 @@ Namespace NeuralProject
             Next
 
             For Y = 0 To layerBound - 1
-                Forward(Y, Y + 1)
+                ForwardNeurons(Y, Y + 1)
             Next
 
             Return Neurons(layerBound)
@@ -182,7 +185,7 @@ Namespace NeuralProject
 
             ' Выполняем прямое распространнение по всем слоям =>
             For Y = 0 To layerBound - 1
-                Forward(Y, Y + 1)
+                ForwardNeurons(Y, Y + 1)
             Next
 
             ' Рассчитываем ошибку по всем нейронам в выходном слое
@@ -193,12 +196,12 @@ Namespace NeuralProject
 
             ' Выполняем обратное распространнение ошибки <=
             For Y = layerBound To 1 Step -1
-                FindErrors(Y, Y - 1)
+                BackwardErrors(Y, Y - 1)
             Next
 
             ' Корректируем веса =>
             For Y = 0 To layerBound - 1
-                Backward(Y, Y + 1)
+                ForwardWeights(Y, Y + 1)
             Next
         End Sub
 
@@ -211,8 +214,11 @@ Namespace NeuralProject
             Next
         End Sub
 
+
         ''' <summary>Прямое распространнение для выбранных слоёв</summary>
-        Private Sub Forward(FromLayerIndex As Integer, ToLayerIndex As Integer)
+        ''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
+        ''' <param name="ToLayerIndex">Индекс слоя куда (следующий)</param>
+        Private Sub ForwardNeurons(FromLayerIndex As Integer, ToLayerIndex As Integer)
 
             ' По всем нейронам слоя "Куда"
             For ToN = 0 To Bounds(ToLayerIndex)
@@ -232,7 +238,9 @@ Namespace NeuralProject
         End Sub
 
         ''' <summary>Обратное распространение ошибки для выбранных слоёв</summary>
-        Private Sub FindErrors(FromLayerIndex As Integer, ToLayerIndex As Integer)
+        ''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
+        ''' <param name="ToLayerIndex">Индекс слоя куда (предыдущий)</param>
+        Private Sub BackwardErrors(FromLayerIndex As Integer, ToLayerIndex As Integer)
             If ToLayerIndex = 0 Then Return ' Ошибку не передаём во входной слой, это не нужно
 
             ' По всем нейронам слоя "Куда"
@@ -247,7 +255,9 @@ Namespace NeuralProject
         End Sub
 
         ''' <summary>Корректировка весов для выбранных слоёв</summary>
-        Private Sub Backward(FromLayerIndex As Integer, ToLayerIndex As Integer)
+        ''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
+        ''' <param name="ToLayerIndex">Индекс слоя куда (следующий)</param>
+        Private Sub ForwardWeights(FromLayerIndex As Integer, ToLayerIndex As Integer)
 
             ' По всем нейронам слоя "Куда"
             For ToN = 0 To Bounds(ToLayerIndex)
