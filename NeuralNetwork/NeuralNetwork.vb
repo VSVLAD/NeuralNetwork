@@ -226,8 +226,11 @@ Namespace NeuralProject
 
                 ' По всем нейронам слоя "Откуда"
                 For FromN = 0 To Bounds(FromLayerIndex)
-                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN) + Biases(FromLayerIndex)
+                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN)
                 Next
+
+                ' Добавляем нейрон смещения при необходимости
+                resultValue += Biases(FromLayerIndex)
 
                 ' Выполняем активацию
                 resultValue = Activators(ToLayerIndex)(ToN).Activate(resultValue)

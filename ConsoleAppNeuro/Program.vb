@@ -5,6 +5,65 @@ Module Program
 
     Private rand As New Random(Environment.TickCount)
 
+
+    Public Sub Main()
+        TaskForecast()
+    End Sub
+
+
+    Public Sub TaskForecast()
+        Dim sqlite As New SQLite.SQLiteConnection("Data Source=""X:\NeuralNetwork\KrasnodarCast.db""")
+        sqlite.Open()
+
+        Dim network As New NeuralNetwork(1, 40, 1)
+        network.Epoch = 0
+        network.LeaningRate = 0.2
+
+        network.changeActivatorFunction(0, New FunctionSigmoid)
+        network.changeActivatorFunction(1, New FunctionSigmoid)
+        network.changeActivatorFunction(2, New FunctionSigmoid)
+
+        Dim rowCount As Integer
+
+        For epoch = 1 To 10000
+            network.AverageQuadError = 0
+            rowCount = 0
+
+            For Each row In sqlite.SelectRows(" select * from weather where strftime('%Y', ondate) = '2018' order by ondate asc ")
+
+                Dim scaledDate = NeuralConvert.ScaleValue(NeuralConvert.ToUnixTime(row("ondate")), 0, 4102444799000, 0, 1)
+                'Dim realDate = NeuralConvert.FromUnixTime(NeuralConvert.ScaleValue(scaledDate, 0, 1, 0, 4102444799))
+
+                Dim scaledTemp = NeuralConvert.ScaleValue(row("temperature"), -273, 273, 0, 1)
+                'Dim realTemp = NeuralConvert.ScaleValue(scaledTemp, 0, 1, -273, 10000)
+
+                network.TrainingSet({scaledDate}, {scaledTemp})
+                rowCount += 1
+            Next
+
+            network.AverageQuadError = network.AverageQuadError / rowCount
+            Console.WriteLine("Эпоха: {0}. Ошибка {1}", epoch, network.AverageQuadError.ToString("##0.################"))
+
+            If epoch Mod 100 Then NeuralState.Save("Forecast.txt", network)
+            If epoch = 2000 Then Exit For
+        Next
+
+
+        Dim testDate As Date = "05.07.2018"
+        Dim predictDate = NeuralConvert.ScaleValue(NeuralConvert.ToUnixTime(testDate), 0, 4102444799, 0, 1)
+        Dim predictTemp = NeuralConvert.ScaleValue(network.Predict({predictDate})(0), 0, 1, -273, 10000)
+
+        Console.WriteLine("На дату {0} спрогнозировали температуру = {1}", testDate.ToShortDateString(), predictTemp)
+
+        For Each row In sqlite.SelectRows($" select * from weather where '{testDate.ToString("yyyy-MM-dd")}' between datetime(ondate, '-3 days') and datetime(ondate, '+3 days') order by ondate asc ")
+            Console.WriteLine("Фактическая температура за {0} = {1}", row("ondate"), row("temperature"))
+        Next
+
+        Console.ReadKey()
+    End Sub
+
+
+
     Private Class MotoSet
         Public Input(4) As Double
         Public Output(4) As Double
@@ -34,15 +93,6 @@ Module Program
 
         Return m
     End Function
-
-
-    Public Sub Main()
-        TaskXOR()
-
-
-    End Sub
-
-
 
     Public Sub TaskMoto()
         Dim NN As New NeuralNetwork(5, 25, 25, 5)

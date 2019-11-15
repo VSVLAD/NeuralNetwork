@@ -3,7 +3,7 @@ Option Strict On
 
 Namespace NeuralProject
 
-    ''' <summary>Логистическая функция Сигмоида</summary>
+    ''' <summary>Логистическая функция Сигмоида. Значения [0, 1]</summary>
     Public Class FunctionSigmoid
         Implements IFunctionActivator
 

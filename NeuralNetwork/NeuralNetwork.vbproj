@@ -67,9 +67,10 @@
     <Compile Include="Classes\FunctionRelu.vb" />
     <Compile Include="Classes\FunctionHypertan.vb" />
     <Compile Include="Classes\FunctionSigmoid.vb" />
+    <Compile Include="NeuralConvert.vb" />
+    <Compile Include="NeuralState.vb" />
     <Compile Include="Interfaces\IFunctionActivator.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
-    <Compile Include="NeuralState.vb" />
     <Compile Include="NeuralNetwork.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

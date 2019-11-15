@@ -3,7 +3,7 @@ Option Strict On
 
 Namespace NeuralProject
 
-    ''' <summary>Функция Гипертангенса</summary>
+    ''' <summary>Функция Гиперболического тангенса. Значения [-1, 1]</summary>
     Public Class FunctionHypertan
         Implements IFunctionActivator
 
