@@ -15,13 +15,13 @@ Namespace NeuralProject
         Public Neurons()() As Double
 
         ''' <summary>
-        ''' Массив со списком весов (y)(m, n)
+        ''' Массив со списком весов (y)(m)(n)
         ''' y - номер между текущим слоем и следующим
         ''' m - номер нейрона из текущего слоя
         ''' n - номер нейрона из следующего слоя
-        ''' (m, n) - значением является переданный вес
+        ''' (m)(n) - значением является переданный вес
         ''' </summary>
-        Public Weights()(,) As Double
+        Public Weights()()() As Double
 
         ''' <summary>
         ''' Массив со списком ошибок (y)(n)
@@ -47,9 +47,9 @@ Namespace NeuralProject
         Public Biases() As Double
 
         ''' <summary>
-        ''' Массив со списком границ массивов (y)
+        ''' Массив со списком границ массивов у слоёв (y)
         ''' y - номер слоя
-        ''' (y) - значением является число - кол-во элементов в массиве - 1
+        ''' (y) - значением является число = кол-во элементов в массиве - 1
         ''' </summary>
         Private Bounds() As Integer
 
@@ -59,7 +59,7 @@ Namespace NeuralProject
         Public LeaningRate As Double = 0.01
 
         ''' <summary>
-        ''' Эпоха
+        ''' Текущая эпоха
         ''' </summary>
         Public Epoch As Integer = 0
 
@@ -68,18 +68,95 @@ Namespace NeuralProject
         ''' </summary>
         Public AverageQuadError As Double = 0.0
 
-
         'Коллекция функций активаций
-        Friend Functions As Dictionary(Of String, IFunctionActivator)
-
-        ' Рандом
-        Private rand As Random
+        Friend Functions As IDictionary(Of String, IFunctionActivator)
 
         ' Граница всех слоёв
         Private layerBound As Integer
 
         ' Граница всех весов
         Private weightBound As Integer
+
+
+        ''' <summary>Метод заполняем случайными числами веса в сети</summary>
+        Public Sub regenerateWeights()
+
+            ' Инициализируем рандомизатор
+            Dim rand As New Random(Environment.TickCount)
+
+            ' Определяем размерность для весов
+            For I = 0 To weightBound
+                For M = 0 To Weights(I).GetUpperBound(0)
+                    For N = 0 To Weights(I)(M).GetUpperBound(0)
+                        Weights(I)(M)(N) = Math.Round(-0.5 + rand.NextDouble() * 1.5, 4)
+                    Next
+                Next
+            Next
+        End Sub
+
+        ''' <summary>Метод инициализирует словарь с функциями активации</summary>
+        Public Function regenerateFunctionList() As Dictionary(Of String, IFunctionActivator)
+            Dim result As New Dictionary(Of String, IFunctionActivator)
+            Dim typeIAF = GetType(IFunctionActivator)
+
+            For Each xAssembly In AppDomain.CurrentDomain.GetAssemblies()
+                For Each xType In xAssembly.GetTypes()
+                    If xType.IsClass AndAlso Not xType.IsAbstract AndAlso typeIAF.IsAssignableFrom(xType) Then
+                        Dim objFunction = CType(Activator.CreateInstance(xType), IFunctionActivator)
+                        result.Add(objFunction.Name, objFunction)
+                    End If
+                Next
+            Next
+
+            Return result
+        End Function
+
+        ''' <summary>Метод создаёт базовую структуру из массивов для нейронной сети</summary>
+        ''' <param name="NeuronCount">Массив с количеством нейронов в слоях</param>
+        Public Sub regenerateNetworkStructure(ParamArray NeuronCount() As Integer)
+
+            ' Находим границы
+            layerBound = NeuronCount.Length - 1
+            weightBound = NeuronCount.Length - 2
+
+            ' Определяем размерность
+            ReDim Bounds(layerBound)
+            ReDim Neurons(layerBound)
+            ReDim Errors(layerBound)
+            ReDim Activators(layerBound)
+            ReDim Biases(layerBound)
+            ReDim Weights(weightBound)
+
+            ' Инициализируем сигналы, ошибки и активаторы под количество нейронов в каждом слое
+            For Y = 0 To layerBound
+
+                ' Граница массива у каждого слоя (количество нейронов) в целях оптимизации доступа
+                Bounds(Y) = NeuronCount(Y) - 1
+
+                ReDim Neurons(Y)(Bounds(Y))
+                ReDim Errors(Y)(Bounds(Y))
+                ReDim Activators(Y)(Bounds(Y))
+                ReDim Biases(Y)
+
+                ' Нейрон смещения
+                Biases(Y) = 0
+
+                ' Функция активации по-умолчанию сигмойда
+                For N = 0 To Bounds(Y)
+                    Activators(Y)(N) = Functions("SIGMOID")
+                Next
+            Next
+
+            ' Определяем размерность для весов
+            For Y = 0 To weightBound
+                ReDim Weights(Y)(Bounds(Y)) ' Инициализируем массив, содержащий нейроны текущего слоя (M)
+
+                For M = 0 To Weights(Y).GetUpperBound(0)
+                    ReDim Weights(Y)(M)(Bounds(Y + 1)) ' Инициализируем массив, содержащий нейроны следующего слоя (N)
+
+                Next
+            Next
+        End Sub
 
 
         ''' <summary>
@@ -98,76 +175,26 @@ Namespace NeuralProject
                 If xItem <= 0 Then Throw New Exception("Количество нейронов в слое не может быть меньше или равное нулю")
             Next
 
-            ' Находим границы
-            layerBound = NeuronCount.Length - 1
-            weightBound = NeuronCount.Length - 2
-
-            ' Определяем размерность
-            ReDim Bounds(layerBound)
-            ReDim Neurons(layerBound)
-            ReDim Errors(layerBound)
-            ReDim Activators(layerBound)
-            ReDim Biases(layerBound)
-            ReDim Weights(weightBound)
-
             ' Находим все функции активации в приложении
-            Functions = New Dictionary(Of String, IFunctionActivator)
-            Dim typeIAF = GetType(IFunctionActivator)
+            Me.Functions = regenerateFunctionList()
 
-            For Each xAssembly In AppDomain.CurrentDomain.GetAssemblies()
-                For Each xType In xAssembly.GetTypes()
-                    If xType.IsClass AndAlso Not xType.IsAbstract AndAlso typeIAF.IsAssignableFrom(xType) Then
-                        Dim objFunction = CType(Activator.CreateInstance(xType), IFunctionActivator)
-                        Functions.Add(objFunction.Name, objFunction)
-                    End If
-                Next
-            Next
+            ' Создаём структуру
+            regenerateNetworkStructure(NeuronCount)
 
-            ' Определяем размерность для нейронов
-            For I = 0 To NeuronCount.Length - 1
-
-                ' Инициализируем границу 
-                Bounds(I) = NeuronCount(I) - 1
-
-                ReDim Neurons(I)(Bounds(I))
-                ReDim Errors(I)(Bounds(I))
-                ReDim Activators(I)(Bounds(I))
-                ReDim Biases(I)
-
-                ' Нейрон смещения
-                Biases(I) = 0
-
-                ' Инициализируем активаторы сигмойдой по-умолчанию
-                For N = 0 To Activators(I).GetUpperBound(0)
-                    Activators(I)(N) = Functions("SIGMOID")
-                Next
-            Next
-
-            ' Определяем размерность для весов
-            For I = 0 To weightBound
-                ReDim Weights(I)(Neurons(I).Length - 1, Neurons(I + 1).Length - 1)
-
-                ' Инициализируем веса случайными числами
-                rand = New Random(Environment.TickCount)
-
-                For M = 0 To Weights(I).GetUpperBound(0)
-                    For N = 0 To Weights(I).GetUpperBound(1)
-                        Weights(I)(M, N) = Math.Round(-0.5 + rand.NextDouble() * 1.5, 4)
-                    Next
-                Next
-            Next
+            ' Заполяем веса
+            regenerateWeights()
         End Sub
 
         ''' <summary>Передаём исходные данные и рассчитываем результат сети</summary>
         ''' <param name="InputValues">Массив исходных значений</param>
         ''' <returns>Возвращает массив значений выходных нейронов</returns>
         Public Function Predict(InputValues() As Double) As Double()
-            For I = 0 To InputValues.GetUpperBound(0)
-                Neurons(0)(I) = InputValues(I)
+            For N = 0 To InputValues.GetUpperBound(0)
+                Neurons(0)(N) = InputValues(N)
             Next
 
             For Y = 0 To layerBound - 1
-                ForwardNeurons(Y, Y + 1)
+                ForwardSignals(Y, Y + 1)
             Next
 
             Return Neurons(layerBound)
@@ -178,108 +205,153 @@ Namespace NeuralProject
         ''' <param name="OutputValue">Массив ожидаемых ответов</param>
         Public Sub TrainingSet(InputValues() As Double, OutputValue() As Double)
 
-            ' Инициализируем все нейроны входного слоя
+            ' Инициализируем все нейроны во входном слое
             For N = 0 To InputValues.GetUpperBound(0)
-                Neurons(0)(N) = InputValues(N)
+                Me.Neurons(0)(N) = InputValues(N)
             Next
 
-            ' Выполняем прямое распространнение по всем слоям =>
+            ' Выполняем прямое распространнение сигнала по всем слоям =>
             For Y = 0 To layerBound - 1
-                ForwardNeurons(Y, Y + 1)
+                ForwardSignals(Y, Y + 1)
             Next
 
-            ' Рассчитываем ошибку по всем нейронам в выходном слое
+            ' Рассчитываем итоговую ошибку по всем нейронам в выходном слое
             For N = 0 To Bounds(layerBound)
-                Errors(layerBound)(N) = OutputValue(N) - Neurons(layerBound)(N)
-                AverageQuadError += Errors(layerBound)(N) ^ 2 ' Рассчитываем итоговую среднеквадратичную ошибку
+                Me.Errors(layerBound)(N) = OutputValue(N) - Neurons(layerBound)(N)
+                Me.AverageQuadError += Errors(layerBound)(N) ^ 2 ' Рассчитываем среднеквадратичную ошибку
             Next
 
             ' Выполняем обратное распространнение ошибки <=
             For Y = layerBound To 1 Step -1
-                BackwardErrors(Y, Y - 1)
+                BackwardErrors(Y - 1, Y)
             Next
 
-            ' Корректируем веса =>
-            For Y = 0 To layerBound - 1
-                ForwardWeights(Y, Y + 1)
-            Next
+            '' Выполняем обратное распространнение ошибки <=
+            'For Y = layerBound To 1 Step -1
+            '    BackwardErrors(Y, Y - 1)
+            'Next
+
+            '' Коррекция весов
+            'For Y = 0 To layerBound - 1
+            '    ForwardWeights(Y, Y + 1)
+            'Next
         End Sub
 
         ''' <summary>Метод изменяет функцию активации у выбранного слоя</summary>
         ''' <param name="LayerIndex">Индекс слоя</param>
-        ''' <param name="Activator">Функция активации</param>
-        Public Sub changeActivatorFunction(LayerIndex As Integer, Activator As IFunctionActivator)
-            For N = 0 To Bounds(LayerIndex)
-                Activators(LayerIndex)(N) = Activator
+        ''' <param name="FunctionName">Название функции активации</param>
+        Public Sub ChangeActivatorFunction(LayerIndex As Integer, FunctionName As String)
+            For NeuronIndex = 0 To Bounds(LayerIndex)
+                ChangeActivatorFunction(LayerIndex, NeuronIndex, FunctionName)
             Next
         End Sub
 
+        ''' <summary>Метод изменяет функцию активации у выбранного слоя и нейрона</summary>
+        ''' <param name="LayerIndex">Индекс слоя</param>
+        ''' <param name="NeuronIndex">Индекс слоя</param>
+        ''' <param name="FunctionName">Название функции активации</param>
+        Public Sub ChangeActivatorFunction(LayerIndex As Integer, NeuronIndex As Integer, FunctionName As String)
+            Activators(LayerIndex)(NeuronIndex) = Functions(FunctionName)
+        End Sub
 
         ''' <summary>Прямое распространнение для выбранных слоёв</summary>
-        ''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
-        ''' <param name="ToLayerIndex">Индекс слоя куда (следующий)</param>
-        Private Sub ForwardNeurons(FromLayerIndex As Integer, ToLayerIndex As Integer)
+        ''' <param name="FromLayerIndex">Индекс слоя откуда (Y)</param>
+        ''' <param name="ToLayerIndex">Индекс слоя куда (Y + 1)</param>
+        Private Sub ForwardSignals(FromLayerIndex As Integer, ToLayerIndex As Integer)
 
             ' По всем нейронам слоя "Куда"
-            For ToN = 0 To Bounds(ToLayerIndex)
+            For toN = 0 To Bounds(ToLayerIndex)
                 Dim resultValue As Double = 0
 
                 ' По всем нейронам слоя "Откуда"
-                For FromN = 0 To Bounds(FromLayerIndex)
-                    resultValue += Neurons(FromLayerIndex)(FromN) * Weights(FromLayerIndex)(FromN, ToN)
+                For fromN = 0 To Bounds(FromLayerIndex)
+                    resultValue += Neurons(FromLayerIndex)(fromN) * Weights(FromLayerIndex)(fromN)(toN)
                 Next
 
                 ' Добавляем нейрон смещения при необходимости
                 resultValue += Biases(FromLayerIndex)
 
-                ' Выполняем активацию
-                resultValue = Activators(ToLayerIndex)(ToN).Activate(resultValue)
-
-                ' Выставляем переданное значение нейрону
-                Neurons(ToLayerIndex)(ToN) = resultValue
+                ' Выполняем активацию и выставляем переданный сигнал в нейрон
+                Neurons(ToLayerIndex)(toN) = Activators(ToLayerIndex)(toN).Activate(resultValue)
             Next
         End Sub
 
         ''' <summary>Обратное распространение ошибки для выбранных слоёв</summary>
-        ''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
-        ''' <param name="ToLayerIndex">Индекс слоя куда (предыдущий)</param>
+        ''' <param name="FromLayerIndex">Индекс слоя откуда (Y - 1)</param>
+        ''' <param name="ToLayerIndex">Индекс слоя куда (Y)</param>
         Private Sub BackwardErrors(FromLayerIndex As Integer, ToLayerIndex As Integer)
-            If ToLayerIndex = 0 Then Return ' Ошибку не передаём во входной слой, это не нужно
 
-            ' По всем нейронам слоя "Куда"
-            For ToN = 0 To Bounds(ToLayerIndex)
-                Errors(ToLayerIndex)(ToN) = 0 ' Обнуляем ошибку
+            For fromN = 0 To Bounds(FromLayerIndex)
 
-                ' По всем нейронам слоя "Откуда"
-                For FromN = 0 To Bounds(FromLayerIndex)
-                    Errors(ToLayerIndex)(ToN) += Errors(FromLayerIndex)(FromN) * Weights(ToLayerIndex)(ToN, FromN)
+                ' Обнуляем ошибку
+                Errors(FromLayerIndex)(fromN) = 0
+
+                ' По всем нейронам слоя "Откуда" расчитываем ошибку
+                For toN = 0 To Bounds(ToLayerIndex)
+                    Errors(FromLayerIndex)(fromN) += Errors(ToLayerIndex)(toN) * Weights(FromLayerIndex)(fromN)(toN)
                 Next
             Next
-        End Sub
-
-        ''' <summary>Корректировка весов для выбранных слоёв</summary>
-        ''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
-        ''' <param name="ToLayerIndex">Индекс слоя куда (следующий)</param>
-        Private Sub ForwardWeights(FromLayerIndex As Integer, ToLayerIndex As Integer)
 
             ' По всем нейронам слоя "Куда"
-            For ToN = 0 To Bounds(ToLayerIndex)
+            For toN = 0 To Bounds(ToLayerIndex)
 
                 ' Получаем значение нейрона
-                Dim gradient As Double = Neurons(ToLayerIndex)(ToN)
+                Dim gradient As Double = Neurons(ToLayerIndex)(toN)
 
                 ' Вычисляем производную (градиент)
-                gradient = Activators(ToLayerIndex)(ToN).Deriviate(gradient)
+                gradient = Activators(ToLayerIndex)(toN).Deriviate(gradient)
 
                 ' По всем нейронам слоя "Откуда"
                 For FromN = 0 To Bounds(FromLayerIndex)
 
                     ' Корректируем вес
-                    Weights(FromLayerIndex)(FromN, ToN) += Neurons(FromLayerIndex)(FromN) * Errors(ToLayerIndex)(ToN) * gradient * LeaningRate
-
+                    Weights(FromLayerIndex)(FromN)(toN) += LeaningRate * Errors(ToLayerIndex)(toN) * (gradient * Neurons(FromLayerIndex)(FromN))
                 Next
             Next
         End Sub
+
+        '''' <summary>Обратное распространение ошибки для выбранных слоёв</summary>
+        '''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
+        '''' <param name="ToLayerIndex">Индекс слоя куда (предыдущий)</param>
+        'Private Sub BackwardErrors(FromLayerIndex As Integer, ToLayerIndex As Integer)
+        '    If ToLayerIndex = 0 Then Return ' Не надо передавать ошибку на входной слой
+
+        '    ' По всем нейронам слоя "Куда"
+        '    For toN = 0 To Bounds(ToLayerIndex)
+        '        Errors(ToLayerIndex)(toN) = 0 ' Обнуляем ошибку
+
+        '        ' По всем нейронам слоя "Откуда" расчитываем ошибку
+        '        For fromN = 0 To Bounds(FromLayerIndex)
+        '            Errors(ToLayerIndex)(toN) += Errors(FromLayerIndex)(fromN) * Weights(ToLayerIndex)(toN)(fromN)
+        '        Next
+
+        '    Next
+        'End Sub
+
+
+        '''' <summary>Корректировка весов для выбранных слоёв</summary>
+        '''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
+        '''' <param name="ToLayerIndex">Индекс слоя куда (следующий)</param>
+        'Private Sub ForwardWeights(FromLayerIndex As Integer, ToLayerIndex As Integer)
+
+        '    ' По всем нейронам слоя "Куда"
+        '    For ToN = 0 To Bounds(ToLayerIndex)
+
+        '        ' Получаем значение нейрона
+        '        Dim gradient As Double = Neurons(ToLayerIndex)(ToN)
+
+        '        ' Вычисляем производную (градиент)
+        '        gradient = Activators(ToLayerIndex)(ToN).Deriviate(gradient)
+
+        '        ' По всем нейронам слоя "Откуда"
+        '        For FromN = 0 To Bounds(FromLayerIndex)
+
+        '            ' Корректируем вес
+        '            Weights(FromLayerIndex)(FromN)(ToN) += LeaningRate * Errors(ToLayerIndex)(ToN) * gradient * Neurons(FromLayerIndex)(FromN)
+
+        '        Next
+        '    Next
+        'End Sub
 
     End Class
 

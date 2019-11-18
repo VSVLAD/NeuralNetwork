@@ -5,53 +5,71 @@ Module Program
 
     Private rand As New Random(Environment.TickCount)
 
-
     Public Sub Main()
-        TaskForecast()
+        TaskXOR()
     End Sub
-
 
     Public Sub TaskForecast()
         Dim sqlite As New SQLite.SQLiteConnection("Data Source=""X:\NeuralNetwork\KrasnodarCast.db""")
         sqlite.Open()
 
-        Dim network As New NeuralNetwork(1, 40, 1)
+        Dim network As New NeuralNetwork(1, 20, 10, 1)
+        'network = NeuralState.Load("Forecast_2.txt")
         network.Epoch = 0
-        network.LeaningRate = 0.2
+        network.LeaningRate = 0.8
 
-        network.changeActivatorFunction(0, New FunctionSigmoid)
-        network.changeActivatorFunction(1, New FunctionSigmoid)
-        network.changeActivatorFunction(2, New FunctionSigmoid)
+        ' Создаём тренировочные сеты
+        Dim rowCount As Integer = sqlite.SelectCell(" select count(*) from weather where strftime('%Y', ondate) = '2018' order by ondate asc ")
+        Dim rowIndex As Integer
 
-        Dim rowCount As Integer
+        Dim trainingData(rowCount - 1, 1) As Double
 
-        For epoch = 1 To 10000
+        For Each row In sqlite.SelectRows(" select * from weather where strftime('%Y', ondate) = '2018' order by ondate asc ")
+            Dim scaledDate = NeuralConvert.Scaler(NeuralConvert.ToUnixTime(row("ondate")), 1420059600000, 1577826000000, 0, 1)
+            Dim scaledTemp = NeuralConvert.Scaler(row("temperature"), -100, 100, 0, 1)
+
+            trainingData(rowIndex, 0) = scaledDate
+            trainingData(rowIndex, 1) = scaledTemp
+
+            rowIndex += 1
+        Next
+
+        ' Перемешиваем данные
+        Dim swap1 As Double, swap2 As Double
+        Dim r1 As Integer, r2 As Integer
+        Randomize()
+
+        For i = 0 To 10000
+            r1 = 1 + (Rnd() * (rowIndex - 2))
+            r2 = 1 + (Rnd() * (rowIndex - 2))
+
+            swap1 = trainingData(r1, 0)
+            swap2 = trainingData(r1, 0)
+            trainingData(r1, 0) = trainingData(r2, 0)
+            trainingData(r1, 1) = trainingData(r2, 1)
+            trainingData(r2, 0) = swap1
+            trainingData(r2, 1) = swap2
+        Next
+
+        ' По эпохам
+        For epoch = 1 To 9000000
             network.AverageQuadError = 0
-            rowCount = 0
 
-            For Each row In sqlite.SelectRows(" select * from weather where strftime('%Y', ondate) = '2018' order by ondate asc ")
-
-                Dim scaledDate = NeuralConvert.ScaleValue(NeuralConvert.ToUnixTime(row("ondate")), 0, 4102444799000, 0, 1)
-                'Dim realDate = NeuralConvert.FromUnixTime(NeuralConvert.ScaleValue(scaledDate, 0, 1, 0, 4102444799))
-
-                Dim scaledTemp = NeuralConvert.ScaleValue(row("temperature"), -273, 273, 0, 1)
-                'Dim realTemp = NeuralConvert.ScaleValue(scaledTemp, 0, 1, -273, 10000)
-
-                network.TrainingSet({scaledDate}, {scaledTemp})
-                rowCount += 1
+            For r = 0 To rowIndex - 1
+                network.TrainingSet({trainingData(r, 0)}, {trainingData(r, 1)})
             Next
 
             network.AverageQuadError = network.AverageQuadError / rowCount
             Console.WriteLine("Эпоха: {0}. Ошибка {1}", epoch, network.AverageQuadError.ToString("##0.################"))
 
             If epoch Mod 100 Then NeuralState.Save("Forecast.txt", network)
-            If epoch = 2000 Then Exit For
+            If network.AverageQuadError < 0.0001 Then Exit For
         Next
 
 
         Dim testDate As Date = "05.07.2018"
-        Dim predictDate = NeuralConvert.ScaleValue(NeuralConvert.ToUnixTime(testDate), 0, 4102444799, 0, 1)
-        Dim predictTemp = NeuralConvert.ScaleValue(network.Predict({predictDate})(0), 0, 1, -273, 10000)
+        Dim predictDate = NeuralConvert.Scaler(NeuralConvert.ToUnixTime(testDate), 1420059600000, 1577826000000, 0, 1)
+        Dim predictTemp = NeuralConvert.Scaler(network.Predict({predictDate})(0), 0, 1, -273, 10000)
 
         Console.WriteLine("На дату {0} спрогнозировали температуру = {1}", testDate.ToShortDateString(), predictTemp)
 
@@ -184,9 +202,9 @@ Module Program
     Public Sub TaskSquareTriangle()
         Dim NN As NeuralNetwork
 
-        NN = NeuralState.Load("SquareTriangle.txt")
-        'NN = New NeuralNetwork(2, 6, 6, 1)
-        'NN.LeaningRate = 0.1
+        'NN = NeuralState.Load("SquareTriangle.txt")
+        NN = New NeuralNetwork(2, 6, 4, 1)
+        NN.LeaningRate = 0.1
 
         ' Обучаем
         For Each Epoch In Enumerable.Range(NN.Epoch, 20000000)
@@ -250,10 +268,11 @@ Module Program
         ' 1  0    1
         ' 1  1    0
 
-        Dim NN As New NeuralNetwork(2, 2, 1)
-        NN.LeaningRate = 0.2
+        Dim NN As New NeuralNetwork(2, 4, 1)
+        NN.ChangeActivatorFunction(2, 0, "RELU")
+        NN.LeaningRate = 0.01
 
-        If IO.File.Exists("XOR.txt") Then NN = NeuralState.Load("XOR.txt")
+        'If IO.File.Exists("XOR.txt") Then NN = NeuralState.Load("XOR.txt")
 
         ' Обучаем
         For Each Epoch In Enumerable.Range(1, 1000000)
@@ -278,7 +297,7 @@ Module Program
         Console.WriteLine("Проверка на значениях: 1 и 0. Ожидаем 1. Решение {0}", NN.Predict({1, 0})(0))
         Console.WriteLine("Проверка на значениях: 1 и 1. Ожидаем 0. Решение {0}", NN.Predict({1, 1})(0))
 
-        NeuralState.Save("XOR.txt", NN)
+        NeuralState.Save("XOR2.txt", NN)
         Console.ReadLine()
     End Sub
 

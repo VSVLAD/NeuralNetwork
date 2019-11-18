@@ -29,14 +29,14 @@ Namespace NeuralProject
             Return Writer
         End Function
 
-        ' Метод сериализует массив формата Double()(,)
-        Private Shared Function WeightSerializer(Writer As StringBuilder, Section As String, Data As Double()(,)) As StringBuilder
+        ' Метод сериализует массив формата Double()()()
+        Private Shared Function WeightSerializer(Writer As StringBuilder, Section As String, Data As Double()()()) As StringBuilder
             Writer.AppendLine($"[{Section}]")
 
             For idxLayer = 0 To Data.GetUpperBound(0)
                 For M = 0 To Data(idxLayer).GetUpperBound(0)
-                    For N = 0 To Data(idxLayer).GetUpperBound(1)
-                        Writer.AppendLine($"({idxLayer})({M},{N})={Data(idxLayer)(M, N)}")
+                    For N = 0 To Data(idxLayer)(M).GetUpperBound(0)
+                        Writer.AppendLine($"({idxLayer})({M},{N})={Data(idxLayer)(M)(N)}")
                     Next
                 Next
             Next
@@ -104,7 +104,7 @@ Namespace NeuralProject
         ' Метод десериализует массив Double()(,)
         Private Shared Function WeightDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
             For Each xMatch As Match In regExpArray2D.Matches(SectionBody)
-                Network.Weights(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value), CInt(xMatch.Groups(3).Value)) = CDbl(xMatch.Groups(4).Value)
+                Network.Weights(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value))(CInt(xMatch.Groups(3).Value)) = CDbl(xMatch.Groups(4).Value)
             Next
 
             Return Network

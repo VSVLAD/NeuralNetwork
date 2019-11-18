@@ -10,7 +10,7 @@
     ''' <param name="ToLow">Нижняя граница диапазона для результирующих чисел</param>
     ''' <param name="ToUp">Верхняя граница диапазона для результирующих чисел</param>
     ''' <returns>Преобразованное число</returns>
-    Public Shared Function ScaleValue(Value As Double, FromLow As Double, FromUp As Double, ToLow As Double, ToUp As Double) As Decimal
+    Public Shared Function Scaler(Value As Double, FromLow As Double, FromUp As Double, ToLow As Double, ToUp As Double) As Decimal
         Return (Value - FromLow) * (ToUp - ToLow) / (FromUp - FromLow) + ToLow
     End Function
 

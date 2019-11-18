@@ -10,11 +10,11 @@ Namespace NeuralProject
         Public ReadOnly Property Name As String = "HYPERTAN" Implements IFunctionActivator.Name
 
         Public Function Activate(Value As Double) As Double Implements IFunctionActivator.Activate
-            Return (2 / (1 + Math.Exp(-2 * Value))) - 1
+            Return (2.0 / (1.0 + Math.Exp(-2.0 * Value))) - 1.0
         End Function
 
         Public Function Deriviate(Value As Double) As Double Implements IFunctionActivator.Deriviate
-            Return 1.0 - Value ^ 2
+            Return 1.0 - Value ^ 2.0
         End Function
 
     End Class
