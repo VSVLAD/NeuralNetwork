@@ -202,39 +202,30 @@ Namespace NeuralProject
 
         ''' <summary>Передаём обучающий сет и тренируем сеть</summary>
         ''' <param name="InputValues">Массив исходных значений</param>
-        ''' <param name="OutputValue">Массив ожидаемых ответов</param>
-        Public Sub TrainingSet(InputValues() As Double, OutputValue() As Double)
+        ''' <param name="TargetValues">Массив ожидаемых ответов</param>
+        Public Sub TrainingSet(InputValues() As Double, TargetValues() As Double)
 
             ' Инициализируем все нейроны во входном слое
             For N = 0 To InputValues.GetUpperBound(0)
                 Me.Neurons(0)(N) = InputValues(N)
             Next
 
-            ' Выполняем прямое распространнение сигнала по всем слоям =>
+            ' Выполняем прямое распространнение =>
             For Y = 0 To layerBound - 1
                 ForwardSignals(Y, Y + 1)
             Next
 
             ' Рассчитываем итоговую ошибку по всем нейронам в выходном слое
             For N = 0 To Bounds(layerBound)
-                Me.Errors(layerBound)(N) = OutputValue(N) - Neurons(layerBound)(N)
+                Me.Errors(layerBound)(N) = TargetValues(N) - Neurons(layerBound)(N)
                 Me.AverageQuadError += Errors(layerBound)(N) ^ 2 ' Рассчитываем среднеквадратичную ошибку
             Next
 
-            ' Выполняем обратное распространнение ошибки <=
+            ' Выполняем обратное распространнение <=
             For Y = layerBound To 1 Step -1
                 BackwardErrors(Y - 1, Y)
             Next
 
-            '' Выполняем обратное распространнение ошибки <=
-            'For Y = layerBound To 1 Step -1
-            '    BackwardErrors(Y, Y - 1)
-            'Next
-
-            '' Коррекция весов
-            'For Y = 0 To layerBound - 1
-            '    ForwardWeights(Y, Y + 1)
-            'Next
         End Sub
 
         ''' <summary>Метод изменяет функцию активации у выбранного слоя</summary>
@@ -281,12 +272,13 @@ Namespace NeuralProject
         ''' <param name="ToLayerIndex">Индекс слоя куда (Y)</param>
         Private Sub BackwardErrors(FromLayerIndex As Integer, ToLayerIndex As Integer)
 
+            ' По всем нейронам слоя "Откуда", это предыдущий слой
             For fromN = 0 To Bounds(FromLayerIndex)
 
                 ' Обнуляем ошибку
                 Errors(FromLayerIndex)(fromN) = 0
 
-                ' По всем нейронам слоя "Откуда" расчитываем ошибку
+                ' По всем нейронам слоя "Куда", это текущий слой
                 For toN = 0 To Bounds(ToLayerIndex)
                     Errors(FromLayerIndex)(fromN) += Errors(ToLayerIndex)(toN) * Weights(FromLayerIndex)(fromN)(toN)
                 Next
@@ -305,53 +297,10 @@ Namespace NeuralProject
                 For FromN = 0 To Bounds(FromLayerIndex)
 
                     ' Корректируем вес
-                    Weights(FromLayerIndex)(FromN)(toN) += LeaningRate * Errors(ToLayerIndex)(toN) * (gradient * Neurons(FromLayerIndex)(FromN))
+                    Weights(FromLayerIndex)(FromN)(toN) += LeaningRate * Errors(ToLayerIndex)(toN) * gradient * Neurons(FromLayerIndex)(FromN)
                 Next
             Next
         End Sub
-
-        '''' <summary>Обратное распространение ошибки для выбранных слоёв</summary>
-        '''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
-        '''' <param name="ToLayerIndex">Индекс слоя куда (предыдущий)</param>
-        'Private Sub BackwardErrors(FromLayerIndex As Integer, ToLayerIndex As Integer)
-        '    If ToLayerIndex = 0 Then Return ' Не надо передавать ошибку на входной слой
-
-        '    ' По всем нейронам слоя "Куда"
-        '    For toN = 0 To Bounds(ToLayerIndex)
-        '        Errors(ToLayerIndex)(toN) = 0 ' Обнуляем ошибку
-
-        '        ' По всем нейронам слоя "Откуда" расчитываем ошибку
-        '        For fromN = 0 To Bounds(FromLayerIndex)
-        '            Errors(ToLayerIndex)(toN) += Errors(FromLayerIndex)(fromN) * Weights(ToLayerIndex)(toN)(fromN)
-        '        Next
-
-        '    Next
-        'End Sub
-
-
-        '''' <summary>Корректировка весов для выбранных слоёв</summary>
-        '''' <param name="FromLayerIndex">Индекс слоя откуда (текущий)</param>
-        '''' <param name="ToLayerIndex">Индекс слоя куда (следующий)</param>
-        'Private Sub ForwardWeights(FromLayerIndex As Integer, ToLayerIndex As Integer)
-
-        '    ' По всем нейронам слоя "Куда"
-        '    For ToN = 0 To Bounds(ToLayerIndex)
-
-        '        ' Получаем значение нейрона
-        '        Dim gradient As Double = Neurons(ToLayerIndex)(ToN)
-
-        '        ' Вычисляем производную (градиент)
-        '        gradient = Activators(ToLayerIndex)(ToN).Deriviate(gradient)
-
-        '        ' По всем нейронам слоя "Откуда"
-        '        For FromN = 0 To Bounds(FromLayerIndex)
-
-        '            ' Корректируем вес
-        '            Weights(FromLayerIndex)(FromN)(ToN) += LeaningRate * Errors(ToLayerIndex)(ToN) * gradient * Neurons(FromLayerIndex)(FromN)
-
-        '        Next
-        '    Next
-        'End Sub
 
     End Class
 
