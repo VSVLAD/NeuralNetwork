@@ -9,6 +9,10 @@ Module Program
         TaskXOR()
     End Sub
 
+    Public Function F(V As Double) As Double
+        Return 1.2 * (0.1 / V)
+    End Function
+
     Public Sub TaskForecast()
         Dim sqlite As New SQLite.SQLiteConnection("Data Source=""X:\NeuralNetwork\KrasnodarCast.db""")
         sqlite.Open()

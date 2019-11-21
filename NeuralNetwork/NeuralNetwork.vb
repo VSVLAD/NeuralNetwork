@@ -40,6 +40,14 @@ Namespace NeuralProject
         Public Activators()() As IFunctionActivator
 
         ''' <summary>
+        ''' Массив со списком задействованных нейронов (y)(n)
+        ''' y - номер слоя
+        ''' n - номер нейрона
+        ''' (n) - 1 - сигнал нейрона будет использован, 0 - сигнал будет обнулён
+        ''' </summary>
+        Public Enabled()() As Double
+
+        ''' <summary>
         ''' Массив содержит слои и нейрон смещения (y)
         ''' y - номер слоя
         ''' (y) - значением является смещение. По-умолчанию 0, нет смещения
@@ -124,6 +132,7 @@ Namespace NeuralProject
             ReDim Neurons(layerBound)
             ReDim Errors(layerBound)
             ReDim Activators(layerBound)
+            ReDim Enabled(layerBound)
             ReDim Biases(layerBound)
             ReDim Weights(weightBound)
 
@@ -136,14 +145,18 @@ Namespace NeuralProject
                 ReDim Neurons(Y)(Bounds(Y))
                 ReDim Errors(Y)(Bounds(Y))
                 ReDim Activators(Y)(Bounds(Y))
+                ReDim Enabled(Y)(Bounds(Y))
                 ReDim Biases(Y)
 
                 ' Нейрон смещения
                 Biases(Y) = 0
 
-                ' Функция активации по-умолчанию сигмойда
                 For N = 0 To Bounds(Y)
+                    ' Функция активации по-умолчанию сигмойда
                     Activators(Y)(N) = Functions("SIGMOID")
+
+                    ' Нейрон задействован
+                    Enabled(Y)(N) = 1
                 Next
             Next
 
@@ -157,7 +170,6 @@ Namespace NeuralProject
                 Next
             Next
         End Sub
-
 
         ''' <summary>
         ''' Создаёт класс нейронной сети с выбранной конфигурацией.
@@ -263,7 +275,7 @@ Namespace NeuralProject
                 resultValue += Biases(FromLayerIndex)
 
                 ' Выполняем активацию и выставляем переданный сигнал в нейрон
-                Neurons(ToLayerIndex)(toN) = Activators(ToLayerIndex)(toN).Activate(resultValue)
+                Neurons(ToLayerIndex)(toN) = Activators(ToLayerIndex)(toN).Activate(resultValue) * Enabled(ToLayerIndex)(toN)
             Next
         End Sub
 

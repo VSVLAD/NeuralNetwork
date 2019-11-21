@@ -10,6 +10,10 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ConsoleAppNeuro", "ConsoleA
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NeuralNetwork", "NeuralNetwork\NeuralNetwork.vbproj", "{A1094CFE-5981-4981-90A9-135E5F70F04C}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TestPaintNeuro", "TestPaintNeuro\TestPaintNeuro.vbproj", "{849E0FCF-2D45-43FD-B3C8-206D3B5DFE4A}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NeuralVisualizer", "NeuralVisualizer\NeuralVisualizer.vbproj", "{B6AC88FA-FC40-4C06-A849-CDFC05726A93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +28,14 @@ Global
 		{A1094CFE-5981-4981-90A9-135E5F70F04C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1094CFE-5981-4981-90A9-135E5F70F04C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1094CFE-5981-4981-90A9-135E5F70F04C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{849E0FCF-2D45-43FD-B3C8-206D3B5DFE4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{849E0FCF-2D45-43FD-B3C8-206D3B5DFE4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{849E0FCF-2D45-43FD-B3C8-206D3B5DFE4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{849E0FCF-2D45-43FD-B3C8-206D3B5DFE4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6AC88FA-FC40-4C06-A849-CDFC05726A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6AC88FA-FC40-4C06-A849-CDFC05726A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6AC88FA-FC40-4C06-A849-CDFC05726A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6AC88FA-FC40-4C06-A849-CDFC05726A93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,7 +14,7 @@ Namespace NeuralProject
         Private Shared regExpNetwork As New Regex("\s*Layers\s*=\s*(.*)$\nLearningRate\s*=\s*(.*)$\nEpoch\s*=\s*(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
         Private Shared regExpArrayAF As New Regex("\((\d+)\)\((\d+)\)\s*=\s*([A-z]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
         Private Shared regExpArray1D As New Regex("\((\d+)\)\((\d+)\)\s*=\s*([\d|\.|\-|E]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
-        Private Shared regExpArray2D As New Regex("\((\d+)\)\((\d+),(\d+)\)\s*=\s*([\d|\.|\-|E]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
+        Private Shared regExpArray2D As New Regex("\((\d+)\)\((\d+)\)\((\d+)\)\s*=\s*([\d|\.|\-|E]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
 
         ' Метод сериализует массив формата Double()()
         Private Shared Function NeuronSerializer(Writer As StringBuilder, Section As String, Data As Double()()) As StringBuilder
@@ -36,7 +36,7 @@ Namespace NeuralProject
             For idxLayer = 0 To Data.GetUpperBound(0)
                 For M = 0 To Data(idxLayer).GetUpperBound(0)
                     For N = 0 To Data(idxLayer)(M).GetUpperBound(0)
-                        Writer.AppendLine($"({idxLayer})({M},{N})={Data(idxLayer)(M)(N)}")
+                        Writer.AppendLine($"({idxLayer})({M})({N})={Data(idxLayer)(M)(N)}")
                     Next
                 Next
             Next
@@ -87,6 +87,15 @@ Namespace NeuralProject
         Private Shared Function NeuronDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
             For Each xMatch As Match In regExpArray1D.Matches(SectionBody)
                 Network.Neurons(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = CDbl(xMatch.Groups(3).Value)
+            Next
+
+            Return Network
+        End Function
+
+        ' Метод десериализует массив Double()()
+        Private Shared Function EnabledDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
+            For Each xMatch As Match In regExpArray1D.Matches(SectionBody)
+                Network.Enabled(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = CDbl(xMatch.Groups(3).Value)
             Next
 
             Return Network
@@ -152,6 +161,9 @@ Namespace NeuralProject
             sbWriter = ActivatorSerializer(sbWriter, "Activators", Network.Activators)
             sbWriter.AppendLine()
 
+            sbWriter = NeuronSerializer(sbWriter, "Enabled", Network.Enabled)
+            sbWriter.AppendLine()
+
             sbWriter = NeuronSerializer(sbWriter, "Errors", Network.Errors)
             sbWriter.AppendLine()
 
@@ -191,6 +203,9 @@ Namespace NeuralProject
 
                     Case "Activators"
                         resultNetwork = ActivatorDeserializer(resultNetwork, sectionBody)
+
+                    Case "Enabled"
+                        resultNetwork = EnabledDeserializer(resultNetwork, sectionBody)
 
                     Case "Errors"
                         resultNetwork = ErrorDeserializer(resultNetwork, sectionBody)
