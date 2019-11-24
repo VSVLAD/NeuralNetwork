@@ -1,5 +1,6 @@
 ﻿Option Explicit On
 Option Strict On
+Imports System.Runtime.InteropServices
 
 Namespace NeuralProject
 
@@ -45,7 +46,7 @@ Namespace NeuralProject
         ''' n - номер нейрона
         ''' (n) - 1 - сигнал нейрона будет использован, 0 - сигнал будет обнулён
         ''' </summary>
-        Public Enabled()() As Double
+        Public Activities()() As Double
 
         ''' <summary>
         ''' Массив содержит слои и нейрон смещения (y)
@@ -132,7 +133,7 @@ Namespace NeuralProject
             ReDim Neurons(layerBound)
             ReDim Errors(layerBound)
             ReDim Activators(layerBound)
-            ReDim Enabled(layerBound)
+            ReDim Activities(layerBound)
             ReDim Biases(layerBound)
             ReDim Weights(weightBound)
 
@@ -145,7 +146,7 @@ Namespace NeuralProject
                 ReDim Neurons(Y)(Bounds(Y))
                 ReDim Errors(Y)(Bounds(Y))
                 ReDim Activators(Y)(Bounds(Y))
-                ReDim Enabled(Y)(Bounds(Y))
+                ReDim Activities(Y)(Bounds(Y))
                 ReDim Biases(Y)
 
                 ' Нейрон смещения
@@ -156,7 +157,7 @@ Namespace NeuralProject
                     Activators(Y)(N) = Functions("SIGMOID")
 
                     ' Нейрон задействован
-                    Enabled(Y)(N) = 1
+                    Activities(Y)(N) = 1
                 Next
             Next
 
@@ -275,7 +276,7 @@ Namespace NeuralProject
                 resultValue += Biases(FromLayerIndex)
 
                 ' Выполняем активацию и выставляем переданный сигнал в нейрон
-                Neurons(ToLayerIndex)(toN) = Activators(ToLayerIndex)(toN).Activate(resultValue) * Enabled(ToLayerIndex)(toN)
+                Neurons(ToLayerIndex)(toN) = Activators(ToLayerIndex)(toN).Activate(resultValue) * Activities(ToLayerIndex)(toN)
             Next
         End Sub
 

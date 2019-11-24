@@ -96,7 +96,7 @@ Public Class Form1
         ' Выбираем частично точки
         userDrawFiltered.Clear()
 
-        For I = 0 To userDraw.Count - 1 Step 6
+        For I = 0 To userDraw.Count - 1 Step userDraw.Count / 20
             userDrawFiltered.Add(userDraw(I))
         Next
 
@@ -220,15 +220,15 @@ Public Class Form1
 
     ' Отключить нейрончик
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        For ind = 0 To nn.Enabled(1).Length - 1
+        For ind = 0 To nn.Activities(1).Length - 1
 
             ' Восстановить всё
-            For ind2 = 0 To nn.Enabled(1).Length - 1
-                nn.Enabled(1)(ind2) = 1
+            For ind2 = 0 To nn.Activities(1).Length - 1
+                nn.Activities(1)(ind2) = 1
             Next
 
-            Me.Text = $"Во втором слое отключен нейрон № {ind + 1} из {nn.Enabled(1).Length}"
-            nn.Enabled(1)(ind) = 0
+            Me.Text = $"Во втором слое отключен нейрон № {ind + 1} из {nn.Activities(1).Length}"
+            nn.Activities(1)(ind) = 0
 
             PredictByUserDraw()
             RedrawLines(g)

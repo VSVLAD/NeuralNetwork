@@ -6,6 +6,9 @@ Module Program
     Private rand As New Random(Environment.TickCount)
 
     Public Sub Main()
+        Dim p As New FunctionSigmoid
+        Dim r = p.Activate(0)
+
         TaskXOR()
     End Sub
 

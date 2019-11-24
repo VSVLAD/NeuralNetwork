@@ -2,6 +2,7 @@
 Option Strict On
 
 Imports System.IO
+Imports System.Runtime.InteropServices
 Imports System.Text
 Imports System.Text.RegularExpressions
 
@@ -60,6 +61,7 @@ Namespace NeuralProject
         ' Метод сериализует параметры сети
         Private Shared Function NetworkSerializer(Writer As StringBuilder, Section As String, Layers As String, LearningRate As Double, Epoch As Integer) As StringBuilder
             Writer.AppendLine($"[{Section}]")
+            Writer.AppendLine($"Version=2")
             Writer.AppendLine($"Layers={Layers}")
             Writer.AppendLine($"LearningRate={LearningRate}")
             Writer.AppendLine($"Epoch={Epoch}")
@@ -93,9 +95,9 @@ Namespace NeuralProject
         End Function
 
         ' Метод десериализует массив Double()()
-        Private Shared Function EnabledDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
+        Private Shared Function ActivityDeserializer(Network As NeuralNetwork, SectionBody As String) As NeuralNetwork
             For Each xMatch As Match In regExpArray1D.Matches(SectionBody)
-                Network.Enabled(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = CDbl(xMatch.Groups(3).Value)
+                Network.Activities(CInt(xMatch.Groups(1).Value))(CInt(xMatch.Groups(2).Value)) = CDbl(xMatch.Groups(3).Value)
             Next
 
             Return Network
@@ -161,7 +163,7 @@ Namespace NeuralProject
             sbWriter = ActivatorSerializer(sbWriter, "Activators", Network.Activators)
             sbWriter.AppendLine()
 
-            sbWriter = NeuronSerializer(sbWriter, "Enabled", Network.Enabled)
+            sbWriter = NeuronSerializer(sbWriter, "Activities", Network.Activities)
             sbWriter.AppendLine()
 
             sbWriter = NeuronSerializer(sbWriter, "Errors", Network.Errors)
@@ -204,8 +206,8 @@ Namespace NeuralProject
                     Case "Activators"
                         resultNetwork = ActivatorDeserializer(resultNetwork, sectionBody)
 
-                    Case "Enabled"
-                        resultNetwork = EnabledDeserializer(resultNetwork, sectionBody)
+                    Case "Activities"
+                        resultNetwork = ActivityDeserializer(resultNetwork, sectionBody)
 
                     Case "Errors"
                         resultNetwork = ErrorDeserializer(resultNetwork, sectionBody)
