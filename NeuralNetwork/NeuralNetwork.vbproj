@@ -69,6 +69,7 @@
     <Compile Include="Classes\FunctionRelu.vb" />
     <Compile Include="Classes\FunctionHypertan.vb" />
     <Compile Include="Classes\FunctionSigmoid.vb" />
+    <Compile Include="Interfaces\INetworkControl.vb" />
     <Compile Include="NeuralConvert.vb" />
     <Compile Include="NeuralVisualizer.vb" />
     <Compile Include="NeuralState.vb" />

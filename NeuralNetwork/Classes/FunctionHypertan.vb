@@ -1,7 +1,10 @@
 ﻿Option Explicit On
 Option Strict On
 
-Namespace NeuralProject
+Imports NeuralProject.Interfaces
+
+
+Namespace NeuralProject.Activators
 
     ''' <summary>Функция Гиперболического тангенса. Значения [-1, 1]</summary>
     Public Class FunctionHypertan

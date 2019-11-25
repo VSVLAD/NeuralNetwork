@@ -2,13 +2,14 @@
 Option Strict On
 
 Imports System.IO
-Imports System.Runtime.InteropServices
 Imports System.Text
 Imports System.Text.RegularExpressions
+Imports NeuralProject.Interfaces
+
 
 Namespace NeuralProject
 
-    ''' <summary>Класс предоставляем методы для сериализации и десериализации нейросети</summary>
+    ''' <summary>Класс предоставляет методы для сериализации и десериализации нейросети</summary>
     Public Class NeuralState
 
         Private Shared regExpSection As New Regex("\[(.*?)\]([\W\w]+?(?:\r{2,}|\n{2,}|$))", RegexOptions.Compiled Or RegexOptions.Multiline)

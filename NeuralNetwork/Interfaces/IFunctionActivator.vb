@@ -1,7 +1,7 @@
 ﻿Option Explicit On
 Option Strict On
 
-Namespace NeuralProject
+Namespace NeuralProject.Interfaces
 
     ''' <summary>Интерфейс для реализации функций активации и производной</summary>
     Public Interface IFunctionActivator

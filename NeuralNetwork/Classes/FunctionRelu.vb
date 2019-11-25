@@ -1,7 +1,10 @@
 ﻿Option Explicit On
 Option Strict On
 
-Namespace NeuralProject
+Imports NeuralProject.Interfaces
+
+
+Namespace NeuralProject.Activators
 
     ''' <summary>Функция ReLU</summary>
     Public Class FunctionRelu

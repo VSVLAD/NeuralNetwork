@@ -1,6 +1,8 @@
 ﻿Option Explicit On
 Option Strict On
-Imports System.Runtime.InteropServices
+
+Imports NeuralProject.Interfaces
+
 
 Namespace NeuralProject
 
@@ -244,9 +246,9 @@ Namespace NeuralProject
         ''' <summary>Метод изменяет функцию активации у выбранного слоя</summary>
         ''' <param name="LayerIndex">Индекс слоя</param>
         ''' <param name="FunctionName">Название функции активации</param>
-        Public Sub ChangeActivatorFunction(LayerIndex As Integer, FunctionName As String)
+        Public Sub ChangeActivator(LayerIndex As Integer, FunctionName As String)
             For NeuronIndex = 0 To Bounds(LayerIndex)
-                ChangeActivatorFunction(LayerIndex, NeuronIndex, FunctionName)
+                ChangeActivator(LayerIndex, NeuronIndex, FunctionName)
             Next
         End Sub
 
@@ -254,7 +256,7 @@ Namespace NeuralProject
         ''' <param name="LayerIndex">Индекс слоя</param>
         ''' <param name="NeuronIndex">Индекс слоя</param>
         ''' <param name="FunctionName">Название функции активации</param>
-        Public Sub ChangeActivatorFunction(LayerIndex As Integer, NeuronIndex As Integer, FunctionName As String)
+        Public Sub ChangeActivator(LayerIndex As Integer, NeuronIndex As Integer, FunctionName As String)
             Activators(LayerIndex)(NeuronIndex) = Functions(FunctionName)
         End Sub
 

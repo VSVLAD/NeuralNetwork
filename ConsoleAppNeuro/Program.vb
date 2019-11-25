@@ -6,15 +6,104 @@ Module Program
     Private rand As New Random(Environment.TickCount)
 
     Public Sub Main()
-        Dim p As New FunctionSigmoid
-        Dim r = p.Activate(0)
-
         TaskXOR()
     End Sub
 
-    Public Function F(V As Double) As Double
-        Return 1.2 * (0.1 / V)
-    End Function
+
+    Public Sub TaskChocolate()
+        Dim network As New NeuralNetwork(8, 200, 100, 7)
+        network.LeaningRate = 0.1
+        network.ChangeActivator(3, "RELU")
+
+        ' По всем эпохам
+        Dim N As Integer
+        Do While N < 10000000
+            N += 1
+
+            network.Epoch = N
+            network.AverageQuadError = 0
+            network.AverageQuadError = network.AverageQuadError / 265
+            If network.AverageQuadError < 0.00000001 Then Exit Do
+
+            Console.WriteLine("Эпоха: {0}. Ошибка {1}", network.Epoch, network.AverageQuadError.ToString("##0.################"))
+
+            ' Управление
+            If Console.KeyAvailable Then
+                Select Case Console.ReadKey().Key
+                    Case ConsoleKey.Z
+
+                        ' Тестируем, запускаем машину
+                        Console.WriteLine("=== Проверка работы сети ===")
+
+                        ' Days
+                        Dim toHardChoco = 0.7
+                        Dim processData() = {0.041667, 0.25, 0.1, 0.1, 0.000204, 1.235, toHardChoco, 0.003}
+
+                        For d = 1 To 31
+                            For h = 1 To 24
+                                Console.WriteLine($"День: {d} Час: {h}")
+
+                                Dim result() = network.Predict(processData)
+                                result(0) = Math.Round(result(0), 2)
+                                result(1) = Math.Round(result(1), 2)
+                                result(2) = Math.Round(result(2), 2)
+                                result(3) = Math.Round(result(3), 2)
+                                result(4) = Math.Round(result(4), 2)
+                                result(5) = Math.Round(result(5), 2)
+                                result(6) = Math.Round(result(6), 2)
+
+                                Console.WriteLine($"Расчитана горкость: {Math.Round(processData(6) * 100, 2)}. Ожидаемая горкость: {toHardChoco * 100}")
+                                Console.WriteLine($"Расчитана пропорция: {Math.Round(processData(7) * 100, 2)}. Ожидаемо 100%")
+
+                                ' Включен ли двигатель
+                                If result(0) > 0.8 Then
+
+                                    'Какао
+                                    If result(1) > 0.8 Then processData(1) += 1
+                                    If result(2) > 0.8 Then processData(1) -= 1
+
+                                    'Молоко
+                                    If result(3) > 0.8 Then processData(2) += 1
+                                    If result(4) > 0.8 Then processData(2) -= 1
+
+                                    'Сахар
+                                    If result(5) > 0.8 Then processData(3) += 1
+                                    If result(6) > 0.8 Then processData(3) -= 1
+                                Else
+                                    Console.WriteLine("Не рабочий час")
+                                End If
+
+                                ' Следующий день
+                                processData(0) = h / 24
+                                Threading.Thread.Sleep(100)
+                            Next
+                        Next
+
+                        Console.ReadKey()
+
+                    Case ConsoleKey.S
+                        network.LeaningRate += 0.01
+                        Console.Title = "LeaningRate: " & network.LeaningRate
+
+                    Case ConsoleKey.A
+                        network.LeaningRate -= 0.01
+                        If network.LeaningRate <= 0 Then network.LeaningRate = 0.01
+                        Console.Title = "LeaningRate: " & network.LeaningRate
+
+                    Case ConsoleKey.F1
+                        NeuralState.Save("Choco.txt", network)
+
+                    Case ConsoleKey.F2
+                        network = NeuralState.Load("Choco.txt")
+                        N = network.Epoch
+
+                End Select
+            End If
+        Loop
+
+
+    End Sub
+
 
     Public Sub TaskForecast()
         Dim sqlite As New SQLite.SQLiteConnection("Data Source=""X:\NeuralNetwork\KrasnodarCast.db""")
@@ -276,8 +365,8 @@ Module Program
         ' 1  1    0
 
         Dim NN As New NeuralNetwork(2, 4, 1)
-        NN.ChangeActivatorFunction(2, 0, "RELU")
-        NN.LeaningRate = 0.01
+        NN.ChangeActivator(2, 0, "RELU")
+        NN.LeaningRate = 0.4
 
         'If IO.File.Exists("XOR.txt") Then NN = NeuralState.Load("XOR.txt")
 
@@ -299,10 +388,10 @@ Module Program
 
         ' Тестируем по сетам
         Console.WriteLine("=== Проверка работы сети ===")
-        Console.WriteLine("Проверка на значениях: 0 и 0. Ожидаем 0. Решение {0}", NN.Predict({0, 0})(0))
-        Console.WriteLine("Проверка на значениях: 0 и 1. Ожидаем 1. Решение {0}", NN.Predict({0, 1})(0))
-        Console.WriteLine("Проверка на значениях: 1 и 0. Ожидаем 1. Решение {0}", NN.Predict({1, 0})(0))
-        Console.WriteLine("Проверка на значениях: 1 и 1. Ожидаем 0. Решение {0}", NN.Predict({1, 1})(0))
+        Console.WriteLine("Проверка на значениях: 0 и 0. Ожидаем 0. Решение {0}", NN.Predict({0, 0})(0).ToString("##0.################"))
+        Console.WriteLine("Проверка на значениях: 0 и 1. Ожидаем 1. Решение {0}", NN.Predict({0, 1})(0).ToString("##0.################"))
+        Console.WriteLine("Проверка на значениях: 1 и 0. Ожидаем 1. Решение {0}", NN.Predict({1, 0})(0).ToString("##0.################"))
+        Console.WriteLine("Проверка на значениях: 1 и 1. Ожидаем 0. Решение {0}", NN.Predict({1, 1})(0).ToString("##0.################"))
 
         NeuralState.Save("XOR2.txt", NN)
         Console.ReadLine()

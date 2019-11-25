@@ -1,7 +1,10 @@
 ﻿Option Explicit On
 Option Strict On
 
-Namespace NeuralProject
+Imports NeuralProject.Interfaces
+
+
+Namespace NeuralProject.Activators
 
     ''' <summary>Логистическая функция Сигмоида. Значения [0, 1]</summary>
     Public Class FunctionSigmoid
