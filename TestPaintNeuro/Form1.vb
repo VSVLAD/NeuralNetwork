@@ -14,6 +14,10 @@ Public Class Form1
     Dim bmpBuffer As New Bitmap(500, 500)
     Dim g As Graphics
 
+    Dim lr As Double = 0.1
+    Dim epoch As Integer
+    Dim avgError As Double
+
     ' Перерисовка графики
     Public Sub RedrawLines(graph As Graphics)
         Dim penUser As New Pen(Brushes.BlueViolet, 4)
@@ -22,8 +26,8 @@ Public Class Form1
         Dim brushUserTraining As Brush = Brushes.Red
 
         g.Clear(Color.White)
-        g.DrawString($"Эпоха: {nn.Epoch}", DefaultFont, Brushes.Black, 20, 20)
-        g.DrawString($"Ошибка: {(nn.AverageQuadError / networkDraw.Count).ToString("0.################")}", DefaultFont, Brushes.Black, 20, 50)
+        g.DrawString($"Эпоха: {epoch}", DefaultFont, Brushes.Black, 20, 20)
+        g.DrawString($"Ошибка: {(avgError / networkDraw.Count).ToString("0.################")}", DefaultFont, Brushes.Black, 20, 50)
 
         For I = 1 To userDraw.Count - 1
             graph.DrawLine(penUser, userDraw(I - 1), userDraw(I))
@@ -61,7 +65,6 @@ Public Class Form1
 
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        nn.LeaningRate = 0.1
         nn.Biases(0) = 1
 
         g = Graphics.FromImage(bmpBuffer)
@@ -102,8 +105,7 @@ Public Class Form1
 
         ' По эпохам
         For epoch = 0 To 5000000
-            nn.Epoch = epoch
-            nn.AverageQuadError = 0
+            avgError = 0.0
 
             ' По выбранным точкам пользователя
             Dim stepIndex As Integer = 0
@@ -114,7 +116,7 @@ Public Class Form1
                 Dim scaledX As Double = NeuralConvert.Scaler(pnt.X, 0, 500, 0, 1)
                 Dim scaledY As Double = NeuralConvert.Scaler(pnt.Y, 0, 500, 0, 1)
 
-                nn.Training({scaledX, scaledStep}, {scaledY})
+                avgError += nn.Training({scaledX, scaledStep}, {scaledY}, lr)
             Next
 
             ' Смотрим чему обучилась. Прогнозируем
@@ -155,7 +157,7 @@ Public Class Form1
 
     Private Sub TrackBar1_ValueChanged(sender As Object, e As EventArgs) Handles TrackBar1.ValueChanged
         Label2.Text = TrackBar1.Value / 100
-        nn.LeaningRate = TrackBar1.Value / 100
+        lr = TrackBar1.Value / 100
     End Sub
 
     Private Sub TrackBar2_ValueChanged(sender As Object, e As EventArgs) Handles TrackBar2.ValueChanged
@@ -180,12 +182,11 @@ Public Class Form1
         userDrawFiltered.Add(New Point(200, 100))
         userDrawFiltered.Add(New Point(100, 100))
 
-        nn.LeaningRate = 0.085
+        lr = 0.085
 
         ' По эпохам
         For epoch = 0 To 5000000
-            nn.Epoch = epoch
-            nn.AverageQuadError = 0
+            avgError = 0.0
 
             ' По выбранным точкам пользователя
             Dim stepIndex As Integer = 0
@@ -196,7 +197,7 @@ Public Class Form1
                 Dim scaledX As Double = NeuralConvert.Scaler(pnt.X, 0, 500, 0, 1)
                 Dim scaledY As Double = NeuralConvert.Scaler(pnt.Y, 0, 500, 0, 1)
 
-                nn.Training({scaledX, scaledStep}, {scaledY})
+                avgError += nn.Training({scaledX, scaledStep}, {scaledY}, lr)
             Next
 
             ' Смотрим чему обучилась. Прогнозируем
