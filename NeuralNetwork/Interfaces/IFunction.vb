@@ -4,7 +4,7 @@ Option Strict On
 Namespace NeuralProject.Interfaces
 
     ''' <summary>Интерфейс для реализации функций активации и производной</summary>
-    Public Interface IFunctionActivator
+    Public Interface IFunction
 
         ''' <summary>Название функции</summary>
         ReadOnly Property Name As String

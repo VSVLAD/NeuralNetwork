@@ -69,11 +69,11 @@
     <Compile Include="Classes\FunctionRelu.vb" />
     <Compile Include="Classes\FunctionHypertan.vb" />
     <Compile Include="Classes\FunctionSigmoid.vb" />
-    <Compile Include="Interfaces\INetworkControl.vb" />
+    <Compile Include="Interfaces\INetwork.vb" />
     <Compile Include="NeuralConvert.vb" />
     <Compile Include="NeuralVisualizer.vb" />
     <Compile Include="NeuralState.vb" />
-    <Compile Include="Interfaces\IFunctionActivator.vb" />
+    <Compile Include="Interfaces\IFunction.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="NeuralNetwork.vb" />
   </ItemGroup>

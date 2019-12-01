@@ -114,7 +114,7 @@ Public Class Form1
                 Dim scaledX As Double = NeuralConvert.Scaler(pnt.X, 0, 500, 0, 1)
                 Dim scaledY As Double = NeuralConvert.Scaler(pnt.Y, 0, 500, 0, 1)
 
-                nn.TrainingSet({scaledX, scaledStep}, {scaledY})
+                nn.Training({scaledX, scaledStep}, {scaledY})
             Next
 
             ' Смотрим чему обучилась. Прогнозируем
@@ -196,7 +196,7 @@ Public Class Form1
                 Dim scaledX As Double = NeuralConvert.Scaler(pnt.X, 0, 500, 0, 1)
                 Dim scaledY As Double = NeuralConvert.Scaler(pnt.Y, 0, 500, 0, 1)
 
-                nn.TrainingSet({scaledX, scaledStep}, {scaledY})
+                nn.Training({scaledX, scaledStep}, {scaledY})
             Next
 
             ' Смотрим чему обучилась. Прогнозируем

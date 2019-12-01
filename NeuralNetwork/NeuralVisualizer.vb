@@ -4,6 +4,8 @@ Option Strict On
 Imports System.Drawing
 Imports System.Windows.Forms
 
+Imports NeuralProject.Interfaces
+
 Namespace NeuralProject
 
     Public Class NeuralVisualizer
@@ -25,7 +27,7 @@ Namespace NeuralProject
         Dim brushNeuronFont As New SolidBrush(neuronFontColor)
         Dim brushNeuronBack As New SolidBrush(neuronBackgroundColor)
 
-        Public Sub New(RenderBox As PictureBox, Network As NeuralNetwork)
+        Public Sub New(RenderBox As PictureBox, Network As INetwork)
             renderWidth = RenderBox.Width
             renderHeight = RenderBox.Height
 
