@@ -1,4 +1,5 @@
-﻿Imports NeuralProject
+﻿Imports System.Runtime.CompilerServices
+Imports NeuralProject
 Imports NeuralProject.Interfaces
 
 Module Program
@@ -6,7 +7,7 @@ Module Program
     Private rand As New Random(Environment.TickCount)
 
     Public Sub Main()
-        TaskXOR()
+        TaskBinToDec()
     End Sub
 
 
@@ -437,5 +438,64 @@ Module Program
         Console.ReadLine()
 
     End Sub
+
+
+    Public Sub TaskBinToDec()
+        Dim NN As New NeuralNetwork(3, 16, 8)
+        Dim LeaningRate = 0.5
+        Dim AvgQuadError = 0.0
+
+        ' Обучаем
+        For Each Epoch In Enumerable.Range(1, 100000)
+            AvgQuadError = 0.0
+
+            AvgQuadError += NN.Training({0, 0, 0}, {1, 0, 0, 0, 0, 0, 0, 0}, LeaningRate)
+            AvgQuadError += NN.Training({0, 0, 1}, {0, 1, 0, 0, 0, 0, 0, 0}, LeaningRate)
+            AvgQuadError += NN.Training({0, 1, 0}, {0, 0, 1, 0, 0, 0, 0, 0}, LeaningRate)
+            AvgQuadError += NN.Training({0, 1, 1}, {0, 0, 0, 1, 0, 0, 0, 0}, LeaningRate)
+            AvgQuadError += NN.Training({1, 0, 0}, {0, 0, 0, 0, 1, 0, 0, 0}, LeaningRate)
+            AvgQuadError += NN.Training({1, 0, 1}, {0, 0, 0, 0, 0, 1, 0, 0}, LeaningRate)
+            AvgQuadError += NN.Training({1, 1, 0}, {0, 0, 0, 0, 0, 0, 1, 0}, LeaningRate)
+            AvgQuadError += NN.Training({1, 1, 1}, {0, 0, 0, 0, 0, 0, 0, 1}, LeaningRate)
+
+            AvgQuadError = AvgQuadError / 8
+            If AvgQuadError < 0.0001 Then Exit For
+
+            Console.WriteLine("Эпоха: {0}. Ошибка {1}", Epoch, AvgQuadError.ToString("##0.################"))
+        Next
+
+        ' Тестируем по сетам
+        Console.WriteLine("=== Проверка работы сети ===")
+        Console.WriteLine("Проверка на значениях: 0, 0, 0. Ожидаем 0. Решение {0}", NN.Predict({0, 0, 0}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 0, 0, 1. Ожидаем 1. Решение {0}", NN.Predict({0, 0, 1}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 0, 1, 0. Ожидаем 2. Решение {0}", NN.Predict({0, 1, 0}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 0, 1, 1. Ожидаем 3. Решение {0}", NN.Predict({0, 1, 1}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 1, 0, 0. Ожидаем 4. Решение {0}", NN.Predict({1, 0, 0}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 1, 0, 1. Ожидаем 5. Решение {0}", NN.Predict({1, 0, 1}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 1, 1, 0. Ожидаем 6. Решение {0}", NN.Predict({1, 1, 0}).ToStringDouble(0))
+        Console.WriteLine("Проверка на значениях: 1, 1, 1. Ожидаем 7. Решение {0}", NN.Predict({1, 1, 1}).ToStringDouble(0))
+        Console.WriteLine("")
+        Console.WriteLine("=== Убьём пару нейронов в сети ===")
+        NN.Activities(1)(1) = 0
+        NN.Activities(1)(2) = 0
+        Console.WriteLine("Проверка на значениях: 0, 0, 0. Ожидаем 0. Решение {0}", NN.Predict({0, 0, 0}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 0, 0, 1. Ожидаем 1. Решение {0}", NN.Predict({0, 0, 1}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 0, 1, 0. Ожидаем 2. Решение {0}", NN.Predict({0, 1, 0}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 0, 1, 1. Ожидаем 3. Решение {0}", NN.Predict({0, 1, 1}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 1, 0, 0. Ожидаем 4. Решение {0}", NN.Predict({1, 0, 0}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 1, 0, 1. Ожидаем 5. Решение {0}", NN.Predict({1, 0, 1}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 1, 1, 0. Ожидаем 6. Решение {0}", NN.Predict({1, 1, 0}).ToStringDouble(1))
+        Console.WriteLine("Проверка на значениях: 1, 1, 1. Ожидаем 7. Решение {0}", NN.Predict({1, 1, 1}).ToStringDouble(1))
+
+        Console.ReadLine()
+
+    End Sub
+
+    <Extension>
+    Public Function ToStringDouble(ByVal Numbers() As Double, Optional MaxDecimal As Integer = 16) As String
+        Dim numarr() = Numbers.Select(Function(n) n.ToString("##0." & New String("0", MaxDecimal)).Replace(",", ".")).ToArray()
+        Dim numstring = String.Join(", ", numarr)
+        Return $"[ {numstring} ]"
+    End Function
 
 End Module

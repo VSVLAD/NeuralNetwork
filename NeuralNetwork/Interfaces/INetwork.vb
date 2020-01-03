@@ -6,6 +6,14 @@ Namespace NeuralProject.Interfaces
     ''' <summary>Интерфейс для создания, обучения и рассчета нейронной сети</summary>
     Public Interface INetwork
 
+        ''' <summary>Событие используется, когда завершается передача сигнала в следующий слой</summary>
+        ''' <param name="LayerIndex">Номер слоя</param>
+        Event ForwardComplete(LayerIndex As Integer)
+
+        ''' <summary>Событие используется, когда завершается передача ошибки в предыдущий слой</summary>
+        ''' <param name="LayerIndex">Номер слоя</param>
+        Event BackwardComplete(LayerIndex As Integer)
+
         ''' <summary>Метод создаёт базовую структуру из массивов для нейронной сети</summary>
         ''' <param name="NeuronCount">
         ''' Первый элемент - количество нейронов в входном слое

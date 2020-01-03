@@ -10,6 +10,10 @@ Namespace NeuralProject
     Public Class NeuralNetwork
         Implements INetwork
 
+        ' События
+        Public Event ForwardComplete(LayerIndex As Integer) Implements INetwork.ForwardComplete
+        Public Event BackwardComplete(LayerIndex As Integer) Implements INetwork.BackwardComplete
+
         ''' <summary>
         ''' Массив со списком границ массивов у слоёв (y)
         ''' y - номер слоя
@@ -32,6 +36,7 @@ Namespace NeuralProject
         Private _activators()() As IFunction
         Private _activities()() As Double
         Private _biases() As Double
+
 
         ''' <summary>
         ''' Массив со списком значений нейронов (y)(n)
@@ -263,6 +268,10 @@ Namespace NeuralProject
                 _neurons(0)(N) = InputValues(N)
             Next
 
+            ' Дополнительно вызываем событие для начального слоя (т.к. значения во входном слое это и есть сигналы)
+            RaiseEvent ForwardComplete(0)
+
+
             ' Выполняем прямое распространнение =>
             For Y = 0 To layerBound - 1
                 ForwardSignals(Y, Y + 1)
@@ -275,6 +284,10 @@ Namespace NeuralProject
                 _errors(layerBound)(N) = TargetValues(N) - _neurons(layerBound)(N)
                 averageQuadError += _errors(layerBound)(N) ^ 2 ' Рассчитываем среднеквадратичную ошибку
             Next
+
+
+            ' Дополнительно вызываем событие для конечного слоя (т.к. ошибки в выходном слое считаются отдельно)
+            RaiseEvent BackwardComplete(bounds(layerBound))
 
             ' Выполняем обратное распространнение <=
             For Y = layerBound To 1 Step -1
@@ -321,6 +334,9 @@ Namespace NeuralProject
                 ' Выполняем активацию и выставляем переданный сигнал в нейрон
                 _neurons(ToLayerIndex)(toN) = _activators(ToLayerIndex)(toN).Activate(resultValue) * _activities(ToLayerIndex)(toN)
             Next
+
+            ' Вызываем событие
+            RaiseEvent ForwardComplete(ToLayerIndex)
         End Sub
 
         ''' <summary>Обратное распространение ошибки для выбранных слоёв</summary>
@@ -357,6 +373,9 @@ Namespace NeuralProject
                     _weights(FromLayerIndex)(FromN)(toN) += LearningRate * _errors(ToLayerIndex)(toN) * gradient * _neurons(FromLayerIndex)(FromN)
                 Next
             Next
+
+            ' Вызываем событие
+            RaiseEvent BackwardComplete(FromLayerIndex)
         End Sub
 
 

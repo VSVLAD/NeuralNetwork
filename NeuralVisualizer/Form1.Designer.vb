@@ -23,6 +23,7 @@ Partial Class Form1
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.pbox = New System.Windows.Forms.PictureBox()
+        Me.Button1 = New System.Windows.Forms.Button()
         CType(Me.pbox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -32,15 +33,25 @@ Partial Class Form1
         Me.pbox.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pbox.Location = New System.Drawing.Point(0, 0)
         Me.pbox.Name = "pbox"
-        Me.pbox.Size = New System.Drawing.Size(861, 420)
+        Me.pbox.Size = New System.Drawing.Size(854, 483)
         Me.pbox.TabIndex = 0
         Me.pbox.TabStop = False
+        '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(16, 16)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(120, 32)
+        Me.Button1.TabIndex = 1
+        Me.Button1.Text = "Тренировка XOR"
+        Me.Button1.UseVisualStyleBackColor = True
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(861, 420)
+        Me.ClientSize = New System.Drawing.Size(854, 483)
+        Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.pbox)
         Me.Name = "Form1"
         Me.Text = "Form1"
@@ -50,4 +61,5 @@ Partial Class Form1
     End Sub
 
     Friend WithEvents pbox As PictureBox
+    Friend WithEvents Button1 As Button
 End Class
