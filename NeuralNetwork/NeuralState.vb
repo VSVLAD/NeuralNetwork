@@ -15,8 +15,8 @@ Namespace NeuralProject
         Private Shared regExpSection As New Regex("\[(.*?)\]([\W\w]+?(?:\r{2,}|\n{2,}|$))", RegexOptions.Compiled Or RegexOptions.Multiline)
         Private Shared regExpNetwork As New Regex("\s*Layers\s*=\s*(.*)$", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
         Private Shared regExpArrayAF As New Regex("\((\d+)\)\((\d+)\)\s*=\s*([A-z]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
-        Private Shared regExpArray1D As New Regex("\((\d+)\)\((\d+)\)\s*=\s*([\d|\.|\-|E]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
-        Private Shared regExpArray2D As New Regex("\((\d+)\)\((\d+)\)\((\d+)\)\s*=\s*([\d|\.|\-|E]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
+        Private Shared regExpArray1D As New Regex("\((\d+)\)\((\d+)\)\s*=\s*([\d|\.|\-|E+]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
+        Private Shared regExpArray2D As New Regex("\((\d+)\)\((\d+)\)\((\d+)\)\s*=\s*([\d|\.|\-|E+]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase Or RegexOptions.Multiline)
 
         ' Метод сериализует массив формата Double()()
         Private Shared Function NeuronSerializer(Writer As StringBuilder, Section As String, Data As Double()()) As StringBuilder
