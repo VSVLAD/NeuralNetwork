@@ -7,7 +7,7 @@ Module Program
     Private rand As New Random(Environment.TickCount)
 
     Public Sub Main()
-        TaskBinToDec()
+        TaskUksus()
     End Sub
 
 
@@ -486,6 +486,46 @@ Module Program
         Console.WriteLine("Проверка на значениях: 1, 0, 1. Ожидаем 5. Решение {0}", NN.Predict({1, 0, 1}).ToStringDouble(1))
         Console.WriteLine("Проверка на значениях: 1, 1, 0. Ожидаем 6. Решение {0}", NN.Predict({1, 1, 0}).ToStringDouble(1))
         Console.WriteLine("Проверка на значениях: 1, 1, 1. Ожидаем 7. Решение {0}", NN.Predict({1, 1, 1}).ToStringDouble(1))
+
+        Console.ReadLine()
+
+    End Sub
+
+
+    Public Sub TaskUksus()
+        Dim NN As New NeuralNetwork(1, 16, 1)
+        Dim LeaningRate = 0.12
+        Dim AvgQuadError = 0.0
+
+        ' Обучаем
+        For Each Epoch In Enumerable.Range(1, 200000)
+            AvgQuadError = 0.0
+
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(70, 0, 100, 0, 1)}, {NeuralConvert.Scaler(0, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(30, 0, 100, 0, 1)}, {NeuralConvert.Scaler(1.5, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(10, 0, 100, 0, 1)}, {NeuralConvert.Scaler(6, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(9, 0, 100, 0, 1)}, {NeuralConvert.Scaler(7, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(8, 0, 100, 0, 1)}, {NeuralConvert.Scaler(8, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(7, 0, 100, 0, 1)}, {NeuralConvert.Scaler(9, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(6, 0, 100, 0, 1)}, {NeuralConvert.Scaler(11, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(5, 0, 100, 0, 1)}, {NeuralConvert.Scaler(13, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(4, 0, 100, 0, 1)}, {NeuralConvert.Scaler(17, 0, 50, 0, 1)}, LeaningRate)
+            AvgQuadError += NN.Training({NeuralConvert.Scaler(3, 0, 100, 0, 1)}, {NeuralConvert.Scaler(22.5, 0, 50, 0, 1)}, LeaningRate)
+
+            AvgQuadError = AvgQuadError / 10
+            If AvgQuadError < 0.0001 Then Exit For
+
+            Console.WriteLine("Эпоха: {0}. Ошибка {1}", Epoch, AvgQuadError.ToString("##0.################"))
+        Next
+
+        ' Тестируем по сетам
+        Console.WriteLine("=== Проверка работы сети ===")
+        Console.WriteLine("Проверка на значениях: 9%  Решение {0}", NeuralConvert.Scaler(NN.Predict({NeuralConvert.Scaler(9, 0, 100, 0, 1)})(0), 0, 1, 0, 50))
+        Console.WriteLine("Проверка на значениях: 6%  Решение {0}", NeuralConvert.Scaler(NN.Predict({NeuralConvert.Scaler(6, 0, 100, 0, 1)})(0), 0, 1, 0, 50))
+        Console.WriteLine("Проверка на значениях: 1%  Решение {0}", NeuralConvert.Scaler(NN.Predict({NeuralConvert.Scaler(1, 0, 100, 0, 1)})(0), 0, 1, 0, 50))
+        Console.WriteLine("Проверка на значениях: 30% Решение {0}", NeuralConvert.Scaler(NN.Predict({NeuralConvert.Scaler(30, 0, 100, 0, 1)})(0), 0, 1, 0, 50))
+        Console.WriteLine("Проверка на значениях: 60% Решение {0}", NeuralConvert.Scaler(NN.Predict({NeuralConvert.Scaler(60, 0, 100, 0, 1)})(0), 0, 1, 0, 50))
+        Console.WriteLine("")
 
         Console.ReadLine()
 

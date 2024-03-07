@@ -12,12 +12,12 @@ Namespace NeuralProject
         ''' </summary>
         ''' <param name="Value">Выбранное число для масштабирования</param>
         ''' <param name="FromLow">Нижняя граница диапазона исходых чисел</param>
-        ''' <param name="FromUp">Верхняя граница диапазона исходных чисел</param>
+        ''' <param name="FromHigh">Верхняя граница диапазона исходных чисел</param>
         ''' <param name="ToLow">Нижняя граница диапазона для результирующих чисел</param>
-        ''' <param name="ToUp">Верхняя граница диапазона для результирующих чисел</param>
+        ''' <param name="ToHigh">Верхняя граница диапазона для результирующих чисел</param>
         ''' <returns>Преобразованное число</returns>
-        Public Shared Function Scaler(Value As Double, FromLow As Double, FromUp As Double, ToLow As Double, ToUp As Double) As Double
-            Return (Value - FromLow) * (ToUp - ToLow) / (FromUp - FromLow) + ToLow
+        Public Shared Function Scaler(Value As Double, FromLow As Double, FromHigh As Double, ToLow As Double, ToHigh As Double) As Double
+            Return (Value - FromLow) * (ToHigh - ToLow) / (FromHigh - FromLow) + ToLow
         End Function
 
         ''' <summary>
